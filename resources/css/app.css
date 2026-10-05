@@ -1,0 +1,154 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/plus-jakarta-sans';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+@theme {
+    --font-sans: 'Plus Jakarta Sans Variable', 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif,
+        'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+
+    /* Brand utama: biru laut (satu-satunya warna aksen untuk aksi) */
+    --color-brand-50: #eef6ff;
+    --color-brand-100: #d9eaff;
+    --color-brand-200: #bcdaff;
+    --color-brand-300: #8ec3ff;
+    --color-brand-400: #59a1ff;
+    --color-brand-500: #337dfc;
+    --color-brand-600: #1d5ef1;
+    --color-brand-700: #1549d6;
+    --color-brand-800: #183ead;
+    --color-brand-900: #193988;
+    --color-brand-950: #142453;
+
+    /* Oranye dipakai hanya untuk status peringatan (kursi menipis, waktu bayar hampir habis) */
+    --color-accent-50: #fff7ed;
+    --color-accent-100: #ffedd5;
+    --color-accent-200: #fed7aa;
+    --color-accent-300: #fdba74;
+    --color-accent-400: #fb923c;
+    --color-accent-500: #f97316;
+    --color-accent-600: #ea580c;
+    --color-accent-700: #c2410c;
+
+    /* Token semantik (tema terang saja) */
+    --color-canvas: #f5f7fb;
+    --color-surface: #fdfdfe;
+    --color-surface-muted: #eff3f8;
+    --color-line: #e2e8f0;
+    --color-line-strong: #cbd5e1;
+    --color-ink: #0f172a;
+    --color-ink-muted: #475569;
+    --color-ink-subtle: #64748b;
+    --color-brand-ink: #1549d6;
+    --color-brand-soft: #eef6ff;
+    --color-warn-ink: #c2410c;
+    --color-warn-soft: #fff7ed;
+    --color-ok-ink: #047857;
+    --color-ok-soft: #ecfdf5;
+    --color-danger-ink: #b91c1c;
+    --color-danger-soft: #fef2f2;
+
+    /* Status kursi */
+    --color-seat-available: #fdfdfe;
+    --color-seat-occupied: #cbd5e1;
+    --color-seat-selected: #1d5ef1;
+}
+
+@layer base {
+    html {
+        color-scheme: light;
+        scroll-behavior: smooth;
+    }
+
+    body {
+        @apply bg-canvas text-ink antialiased;
+    }
+
+    /* Focus state yang konsisten & terlihat untuk navigasi keyboard */
+    :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+        @apply outline-2 outline-offset-2 outline-brand-500;
+    }
+
+    [hidden] {
+        display: none !important;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        html {
+            scroll-behavior: auto;
+        }
+
+        *,
+        *::before,
+        *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+        }
+    }
+}
+
+/*
+ * Sistem sudut: kontrol (tombol, input, kursi) 12px, wadah (kartu, panel) 16px,
+ * chip/badge penuh (pill). Dipakai konsisten di seluruh halaman.
+ */
+@utility btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold whitespace-nowrap transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100;
+}
+
+@utility btn-primary {
+    @apply btn bg-brand-600 text-white shadow-sm shadow-brand-600/20 hover:bg-brand-700;
+}
+
+@utility btn-accent {
+    @apply btn bg-accent-600 text-white hover:bg-accent-700;
+}
+
+@utility btn-outline {
+    @apply btn border border-line-strong bg-surface text-ink hover:border-brand-500 hover:text-brand-ink;
+}
+
+@utility btn-ghost {
+    @apply btn px-3 text-ink-muted hover:bg-surface-muted hover:text-ink;
+}
+
+@utility form-label {
+    @apply mb-1.5 block text-sm font-medium text-ink;
+}
+
+@utility form-input {
+    @apply block w-full rounded-xl border border-line-strong bg-surface px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-subtle focus:border-brand-500 focus:ring-2 focus:ring-brand-500/25 focus:outline-none aria-invalid:border-danger-ink;
+}
+
+@utility form-error {
+    @apply mt-1.5 text-xs font-medium text-danger-ink;
+}
+
+@utility form-hint {
+    @apply mt-1.5 text-xs text-ink-subtle;
+}
+
+@utility card {
+    @apply rounded-2xl border border-line bg-surface shadow-[0_1px_2px_rgb(15_23_42/0.04)];
+}
+
+@utility chip {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium;
+}
+
+@utility container-page {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+}
+
+/* Kerangka loading (cek pesanan) */
+@utility skeleton {
+    @apply animate-pulse rounded-lg bg-surface-muted;
+}
+
+/* Hero slider: geser horizontal; transisi mati otomatis lewat aturan reduced-motion di atas */
+@utility slider-track {
+    @apply flex transition-transform duration-700 ease-out;
+}
