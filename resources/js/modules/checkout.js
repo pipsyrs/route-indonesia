@@ -1,4 +1,4 @@
-import { CHECKOUT_KEY, PAYMENT_KEY, cartSignature, getCart } from './cart';
+import { CHECKOUT_KEY, PAYMENT_KEY, cartSignature, getCart, isProductItem } from './cart';
 import { renderCartSummary } from './cart-summary';
 import { showToast } from './toast';
 import { readLocal, removeLocal, writeLocal } from './utils/storage';
@@ -57,7 +57,7 @@ export function initCheckout(root) {
                 email: field('contact_email').toLowerCase(),
                 phone: normalizePhone(field('contact_phone')),
             },
-            passengers: latest.items.map((item) => ({
+            passengers: latest.items.filter((item) => !isProductItem(item)).map((item) => ({
                 itemKey: item.key,
                 names: [...form.querySelectorAll('[data-passenger-name]')]
                     .filter((input) => input.dataset.itemKey === item.key)
@@ -78,7 +78,10 @@ function renderPassengerInputs(root, form, cart) {
     const template = root.querySelector('[data-passenger-group-template]');
     let number = 0;
 
-    container.replaceChildren(...cart.items.map((item, itemIndex) => {
+    // Nama penumpang hanya untuk tiket, bukan produk toko.
+    const tickets = cart.items.filter((item) => !isProductItem(item));
+    container.closest('section').hidden = tickets.length === 0;
+    container.replaceChildren(...tickets.map((item, itemIndex) => {
         const group = template.content.firstElementChild.cloneNode(true);
         group.querySelector('[data-field="legend"]').textContent = `${item.origin} → ${item.destination}, ${item.dateLabel} ${item.depart}`;
         const inputs = group.querySelector('[data-passenger-inputs]');
@@ -133,7 +136,7 @@ function restoreSaved(form, saved) {
     form.querySelector('[data-field="contact_name"]').value = saved.contact.name ?? '';
     form.querySelector('[data-field="contact_email"]').value = saved.contact.email ?? '';
     form.querySelector('[data-field="contact_phone"]').value = saved.contact.phone ?? '';
-    (saved.passengers ?? []).forEach(({ itemKey, names }) => {
+    (Array.isArray(saved.passengers) ? saved.passengers : []).filter((entry) => entry && typeof entry === 'object').forEach(({ itemKey, names }) => {
         const inputs = [...form.querySelectorAll('[data-passenger-name]')].filter((input) => input.dataset.itemKey === itemKey);
         inputs.forEach((input, index) => {
             input.value = names?.[index] ?? '';

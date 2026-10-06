@@ -18,7 +18,7 @@ class HomePageTest extends TestCase
         $response->assertOk()
             ->assertViewHas('cities', fn (array $cities) => count($cities) === 12 && $cities[0] === 'Jakarta')
             ->assertViewHas('popularRoutes', fn (array $routes) => count($routes) === 6)
-            ->assertViewHas('testimonials', fn (array $testimonials) => count($testimonials) === 3)
+            ->assertViewHas('testimonials', fn (array $testimonials) => count($testimonials) === 9)
             ->assertViewHas('defaultDate', $this->tomorrow())
             ->assertSee('Rina Kartika')
             ->assertSee('Tasikmalaya');
@@ -50,7 +50,7 @@ class HomePageTest extends TestCase
 
     public function test_it_should_count_tomorrows_schedules_per_popular_route_when_visiting_home(): void
     {
-        $this->get('/')->assertViewHas('popularRoutes', function (array $routes) {
+        $this->withSession(['locale' => 'id'])->get('/')->assertViewHas('popularRoutes', function (array $routes) {
             $byPair = collect($routes)->keyBy(fn ($route) => "{$route['from']}-{$route['to']}");
 
             return $byPair['Jakarta-Bandung']['trips'] === 8
@@ -68,7 +68,7 @@ class HomePageTest extends TestCase
 
         $this->get('/')
             ->assertOk()
-            ->assertViewHas('testimonials', fn (array $testimonials) => count($testimonials) === 2)
+            ->assertViewHas('testimonials', fn (array $testimonials) => count($testimonials) === 8)
             ->assertDontSee('Rina Kartika');
     }
 

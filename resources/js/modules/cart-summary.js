@@ -1,4 +1,4 @@
-import { cartCount, cartTotals } from './cart';
+import { cartCount, cartTotals, isProductItem } from './cart';
 import { formatRupiah } from './utils/format';
 
 /** Isi <x-cart-summary>; `withItems` menampilkan daftar ringkas per item (checkout/pembayaran). */
@@ -25,7 +25,9 @@ export function renderCartSummary(root, cart, { withItems = false } = {}) {
             row.className = 'flex justify-between gap-4';
             const label = document.createElement('span');
             label.className = 'min-w-0 text-ink-muted';
-            label.textContent = `${item.origin} → ${item.destination}, ${item.depart} × ${item.qty}`;
+            label.textContent = isProductItem(item)
+                ? `${item.name} × ${item.qty}`
+                : `${item.origin} → ${item.destination}, ${item.depart} × ${item.qty}`;
             const price = document.createElement('span');
             price.className = 'shrink-0 text-ink';
             price.textContent = formatRupiah(item.price * item.qty);

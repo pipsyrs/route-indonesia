@@ -68,7 +68,7 @@
 
                     <div class="mt-5 space-y-5">
                         @foreach ($seats as $index => $seat)
-                            <fieldset class="rounded-xl bg-surface-muted p-4" data-passenger data-seat="{{ $seat }}">
+                            <fieldset class="rounded-md bg-surface-muted p-4" data-passenger data-seat="{{ $seat }}">
                                 <legend class="sr-only">Penumpang {{ $index + 1 }}, kursi {{ $seat }}</legend>
                                 <p class="flex items-center gap-2 text-sm font-semibold text-ink" aria-hidden="true">
                                     Penumpang {{ $index + 1 }}

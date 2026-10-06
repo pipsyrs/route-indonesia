@@ -25,7 +25,7 @@
                 <li class="shrink-0">
                     <a href="{{ route($link['route']) }}"
                        @class([
-                           'flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors',
+                           'flex items-center gap-2.5 rounded-md px-3.5 py-2.5 text-sm font-medium transition-colors',
                            'bg-brand-soft text-brand-ink' => $isActive,
                            'text-ink-muted hover:bg-surface-muted hover:text-ink' => ! $isActive,
                        ])
@@ -36,7 +36,7 @@
                 </li>
             @endforeach
             <li class="shrink-0 lg:mt-2 lg:border-t lg:border-line lg:pt-2">
-                <button type="button" class="flex w-full items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-sm font-medium text-ink-muted transition-colors hover:bg-danger-soft hover:text-danger-ink"
+                <button type="button" class="flex w-full items-center gap-2.5 rounded-md px-3.5 py-2.5 text-sm font-medium text-ink-muted transition-colors hover:bg-danger-soft hover:text-danger-ink"
                         data-action="logout" data-redirect="{{ route('home') }}">
                     <x-icon name="logout" class="size-5" />
                     Keluar
@@ -45,7 +45,7 @@
         </ul>
     </nav>
 
-    <p class="mt-5 hidden rounded-xl bg-surface-muted px-3.5 py-3 text-xs text-ink-subtle lg:block">
+    <p class="mt-5 hidden rounded-md bg-surface-muted px-3.5 py-3 text-xs text-ink-subtle lg:block">
         <span class="font-semibold text-ink-muted">Mode demo.</span> Data akun ini contoh dan tidak tersimpan di server.
     </p>
 </aside>

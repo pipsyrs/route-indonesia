@@ -69,7 +69,7 @@
                                         <label class="cursor-pointer">
                                             <input type="radio" name="method" value="{{ $method['id'] }}" class="peer sr-only"
                                                    @if ($loop->parent->first && $loop->first) data-rule="choice" aria-describedby="metode-error" @endif>
-                                            <span class="flex items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3 text-sm transition-colors peer-checked:border-brand-600 peer-checked:bg-brand-soft peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-brand-500">
+                                            <span class="flex items-center gap-3 rounded-md border border-line bg-surface px-4 py-3 text-sm transition-colors peer-checked:border-brand-600 peer-checked:bg-brand-soft peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-brand-500">
                                                 <span class="grid size-9 shrink-0 place-items-center rounded-lg bg-surface-muted font-bold text-ink-muted">
                                                     <x-icon :name="$methodIcons[$method['type']] ?? 'wallet'" class="size-5" />
                                                 </span>
@@ -104,7 +104,7 @@
     </div>
 
     <template data-passenger-group-template>
-        <fieldset class="rounded-xl border border-line p-4" data-passenger-group>
+        <fieldset class="rounded-md border border-line p-4" data-passenger-group>
             <legend class="px-1 text-sm font-semibold text-ink" data-field="legend"></legend>
             <div class="grid gap-3 sm:grid-cols-2" data-passenger-inputs></div>
         </fieldset>

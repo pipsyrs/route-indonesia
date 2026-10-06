@@ -1,4 +1,4 @@
-import { CART_KEY, CHECKOUT_KEY, LAST_ORDER_KEY, PAYMENT_KEY, cartTotals, clearCart, getCart } from './cart';
+import { CART_KEY, CHECKOUT_KEY, LAST_ORDER_KEY, PAYMENT_KEY, cartTotals, clearCart, getCart, isProductItem } from './cart';
 import { renderCartSummary } from './cart-summary';
 import { formatRupiah } from './utils/format';
 import { readLocal, removeLocal, writeLocal } from './utils/storage';
@@ -84,8 +84,9 @@ export function initCheckoutPayment(root) {
 /** Isi & total keranjang harus sama persis dengan snapshot checkout. */
 function matchesCheckout(cart, checkout) {
     const passengers = Array.isArray(checkout.passengers) ? checkout.passengers : [];
-    const sameItems = passengers.length === cart.items.length
-        && cart.items.every((item) => passengers.find((entry) => entry.itemKey === item.key)?.names?.length === item.qty);
+    const tickets = cart.items.filter((item) => !isProductItem(item));
+    const sameItems = passengers.length === tickets.length
+        && tickets.every((item) => passengers.find((entry) => entry.itemKey === item.key)?.names?.length === item.qty);
 
     return sameItems && cartTotals(checkout.serviceFee ?? 0, cart).total === checkout.total;
 }

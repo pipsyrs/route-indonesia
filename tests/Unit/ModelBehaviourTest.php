@@ -144,6 +144,9 @@ class ModelBehaviourTest extends TestCase
 
     public function test_it_should_format_approximate_hours_with_half_hour_rounding(): void
     {
+        $this->assertSame('± 3.5 hrs', TripPresenter::formatApproxHours(210));
+
+        app()->setLocale('id');
         $this->assertSame('± 3 jam', TripPresenter::formatApproxHours(180));
         $this->assertSame('± 3,5 jam', TripPresenter::formatApproxHours(210));
         $this->assertSame('± 1,5 jam', TripPresenter::formatApproxHours(90));

@@ -3,21 +3,22 @@
         <div class="max-w-sm">
             <x-logo />
             <p class="mt-4 text-sm leading-relaxed text-ink-muted">
-                Tiket travel dan shuttle antarkota dari operator terverifikasi. Pilih kursi sendiri, bayar dengan cara yang Anda suka.
+                {{ __('Intercity travel and shuttle tickets from verified operators. Choose your own seat and pay the way you like.') }}
             </p>
         </div>
 
         <div>
-            <h2 class="text-sm font-semibold text-ink">Layanan</h2>
+            <h2 class="text-sm font-semibold text-ink">{{ __('Explore') }}</h2>
             <ul class="mt-3 space-y-2 text-sm text-ink-muted">
-                <li><a class="hover:text-brand-ink" href="{{ route('home') }}">Cari jadwal</a></li>
-                <li><a class="hover:text-brand-ink" href="{{ route('catalog.index') }}">Katalog</a></li>
-                <li><a class="hover:text-brand-ink" href="{{ route('order.check') }}">Cek pesanan</a></li>
+                <li><a class="hover:text-brand-ink" href="{{ route('shop') }}">{{ __('Shop') }}</a></li>
+                <li><a class="hover:text-brand-ink" href="{{ route('trip') }}">{{ __('Trip') }}</a></li>
+                <li><a class="hover:text-brand-ink" href="{{ route('collaboration') }}">{{ __('Collaboration') }}</a></li>
+                <li><a class="hover:text-brand-ink" href="{{ route('career') }}">{{ __('Careers') }}</a></li>
             </ul>
         </div>
 
         <div>
-            <h2 class="text-sm font-semibold text-ink">Bantuan</h2>
+            <h2 class="text-sm font-semibold text-ink">{{ __('Help') }}</h2>
             <ul class="mt-3 space-y-2 text-sm text-ink-muted">
                 <li class="flex items-center gap-2"><x-icon name="phone" class="size-4" /> <a class="hover:text-brand-ink" href="tel:+622150891234">(021) 5089-1234</a></li>
                 <li class="flex items-center gap-2"><x-icon name="mail" class="size-4" /> <a class="hover:text-brand-ink" href="mailto:halo@routeindonesia.id">halo@routeindonesia.id</a></li>
@@ -27,12 +28,27 @@
 
     <div class="border-t border-line">
         <div class="container-page flex flex-col gap-4 py-6 text-xs text-ink-subtle sm:flex-row sm:items-center sm:justify-between">
-            <p>&copy; {{ now()->year }} RouteIndonesia. Data jadwal dan harga di situs ini adalah contoh.</p>
-            <ul class="flex flex-wrap gap-2" aria-label="Metode pembayaran yang didukung">
-                @foreach (['BCA', 'Mandiri', 'BNI', 'BRI', 'GoPay', 'OVO', 'DANA', 'QRIS'] as $method)
-                    <li class="chip border border-line bg-canvas text-ink-muted">{{ $method }}</li>
-                @endforeach
-            </ul>
+            <p>&copy; {{ now()->year }} RouteIndonesia. {{ __('Schedules and prices on this site are sample data.') }}</p>
+            @php
+                $socials = array_filter([
+                    'instagram' => ['label' => 'Instagram', 'url' => config('services.social.instagram')],
+                    'tiktok' => ['label' => 'TikTok', 'url' => config('services.social.tiktok')],
+                    'facebook' => ['label' => 'Facebook', 'url' => config('services.social.facebook')],
+                ], fn ($social) => filled($social['url']));
+            @endphp
+            @if ($socials)
+                <ul class="flex items-center gap-1" aria-label="{{ __('Follow us') }}">
+                    @foreach ($socials as $icon => $social)
+                        <li>
+                            <a href="{{ $social['url'] }}" target="_blank" rel="noopener noreferrer"
+                               class="grid size-9 place-items-center rounded-md text-ink-muted transition-colors hover:bg-surface-muted hover:text-brand-ink"
+                               aria-label="{{ __(':network (opens in a new tab)', ['network' => $social['label']]) }}">
+                                <x-icon :name="'brand-'.$icon" class="size-5" />
+                            </a>
+                        </li>
+                    @endforeach
+                </ul>
+            @endif
         </div>
     </div>
 </footer>

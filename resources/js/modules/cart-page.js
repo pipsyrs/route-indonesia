@@ -1,4 +1,4 @@
-import { getCart, removeItem, updateQty } from './cart';
+import { getCart, isProductItem, removeItem, updateQty } from './cart';
 import { renderCartSummary } from './cart-summary';
 import { formatRupiah } from './utils/format';
 
@@ -64,12 +64,20 @@ function buildRow(template, item) {
     };
 
     row.dataset.cartItem = item.key;
-    set('route', `${item.origin} → ${item.destination}`);
-    set('operator', `${item.operator}, ${item.vehicle}`);
-    set('date', item.dateLabel);
-    set('time', `${item.depart} - ${item.arrive}`);
-    set('pickup', item.pickup ? `${item.pickup.name} (${item.pickup.time})` : '-');
-    set('price', `${formatRupiah(item.price)} / orang`);
+    if (isProductItem(item)) {
+        // Produk toko: tanpa info jadwal/operator.
+        set('route', item.name);
+        row.querySelector('[data-field="operator"]').hidden = true;
+        row.querySelector('dl').hidden = true;
+        set('price', `${formatRupiah(item.price)} / pcs`);
+    } else {
+        set('route', `${item.origin} → ${item.destination}`);
+        set('operator', `${item.operator}, ${item.vehicle}`);
+        set('date', item.dateLabel);
+        set('time', `${item.depart} - ${item.arrive}`);
+        set('pickup', item.pickup ? `${item.pickup.name} (${item.pickup.time})` : '-');
+        set('price', `${formatRupiah(item.price)} / orang`);
+    }
     set('line-total', formatRupiah(item.price * item.qty));
 
     const input = row.querySelector('[data-qty-input]');

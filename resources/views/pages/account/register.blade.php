@@ -47,7 +47,7 @@
             </label>
             <p id="daftar-setuju-error" class="form-error -mt-2" hidden></p>
             <button type="submit" class="btn-primary w-full py-3">Daftar</button>
-            <p class="rounded-xl bg-surface-muted px-3.5 py-2.5 text-xs text-ink-subtle">
+            <p class="rounded-md bg-surface-muted px-3.5 py-2.5 text-xs text-ink-subtle">
                 <span class="font-semibold text-ink-muted">Mode demo.</span> Akun tidak dibuat di server.
             </p>
         </form>

@@ -1,4 +1,4 @@
-import { LAST_ORDER_KEY } from './cart';
+import { LAST_ORDER_KEY, isProductItem, isValidItem } from './cart';
 import { formatRupiah } from './utils/format';
 import { readLocal, writeLocal } from './utils/storage';
 
@@ -27,8 +27,13 @@ export function initOrderSuccess(root) {
     page.querySelector('[data-code-copy]').dataset.copy = order.bookingCode;
 
     const template = root.querySelector('[data-success-item-template]');
-    page.querySelector('[data-success-items]').replaceChildren(...order.items.map((item) => {
+    page.querySelector('[data-success-items]').replaceChildren(...order.items.filter(isValidItem).map((item) => {
         const row = template.content.firstElementChild.cloneNode(true);
+        if (isProductItem(item)) {
+            set(row, 'route', `${item.name} · ${item.qty} pcs`);
+            ['schedule', 'pickup', 'names'].forEach((field) => set(row, field, ''));
+            return row;
+        }
         const names = order.passengers?.find((entry) => entry.itemKey === item.key)?.names ?? [];
         set(row, 'route', `${item.origin} → ${item.destination} · ${item.qty} tiket`);
         set(row, 'schedule', `${item.dateLabel}, ${item.depart} - ${item.arrive} · ${item.operator}`);

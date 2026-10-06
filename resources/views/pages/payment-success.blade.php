@@ -17,7 +17,7 @@
                 <h1 class="mt-5 text-3xl font-extrabold tracking-tight text-ink md:text-4xl">Pembayaran berhasil</h1>
                 <p class="mt-2 text-ink-muted">E-tiket dikirim ke <span class="font-semibold text-ink" data-field="email"></span>.</p>
 
-                <div class="mx-auto mt-6 inline-flex items-center gap-3 rounded-2xl border border-dashed border-line-strong bg-surface px-5 py-3">
+                <div class="mx-auto mt-6 inline-flex items-center gap-3 rounded-lg border border-dashed border-line-strong bg-surface px-5 py-3">
                     <span class="text-left">
                         <span class="block text-xs text-ink-subtle">Kode booking</span>
                         <span class="block font-mono text-2xl font-bold tracking-wider text-ink" data-field="code"></span>

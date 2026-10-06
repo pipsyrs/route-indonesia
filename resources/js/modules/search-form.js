@@ -9,7 +9,7 @@ export function initSearchForm(form) {
     });
 
     form.addEventListener('submit', (event) => {
-        const message = getSearchError(from.value, to.value, date.value, date.min);
+        const message = getSearchError(from.value, to.value, date.value, date.min, form.dataset);
         error.hidden = message === null;
         error.textContent = message ?? '';
         if (message !== null) {
@@ -18,16 +18,16 @@ export function initSearchForm(form) {
     });
 }
 
-function getSearchError(origin, destination, date, minDate) {
+function getSearchError(origin, destination, date, minDate, labels) {
     if (origin === destination) {
-        return 'Kota asal dan tujuan tidak boleh sama.';
+        return labels.errorSameCity ?? 'Kota asal dan tujuan tidak boleh sama.';
     }
     if (!date) {
-        return 'Pilih tanggal berangkat.';
+        return labels.errorNoDate ?? 'Pilih tanggal berangkat.';
     }
     // Format Y-m-d bisa dibandingkan sebagai string.
     if (minDate && date < minDate) {
-        return 'Tanggal berangkat tidak boleh sebelum hari ini.';
+        return labels.errorPastDate ?? 'Tanggal berangkat tidak boleh sebelum hari ini.';
     }
 
     return null;

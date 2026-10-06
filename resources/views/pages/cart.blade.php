@@ -12,7 +12,7 @@
 
         {{-- Empty state; tampil default sampai JS membaca keranjang --}}
         <div class="mx-auto mt-6 flex max-w-lg flex-col items-center py-16 text-center" data-cart-empty>
-            <span class="grid size-16 place-items-center rounded-2xl bg-surface-muted text-ink-subtle">
+            <span class="grid size-16 place-items-center rounded-lg bg-surface-muted text-ink-subtle">
                 <x-icon name="shopping-cart" class="size-8" />
             </span>
             <h2 class="mt-5 text-lg font-bold text-ink">Keranjangmu masih kosong</h2>
@@ -55,7 +55,7 @@
                 </div>
                 <div class="flex items-center gap-2">
                     <label class="sr-only" data-qty-label>Jumlah tiket</label>
-                    <div class="flex items-center rounded-xl border border-line-strong">
+                    <div class="flex items-center rounded-md border border-line-strong">
                         <button type="button" class="grid size-9 place-items-center text-ink-muted hover:text-ink disabled:opacity-40" data-qty-step="-1">
                             <x-icon name="minus" class="size-4" /><span class="sr-only">Kurangi</span>
                         </button>

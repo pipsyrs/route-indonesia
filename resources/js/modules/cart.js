@@ -7,6 +7,7 @@ export const LAST_ORDER_KEY = 'ri_last_order';
 export const SESSION_KEY = 'ri_session';
 
 const CART_VERSION = 1;
+export const PRODUCT_MAX_QTY = 10;
 
 /** Keranjang rusak / versi lain dianggap kosong. */
 export function getCart() {
@@ -15,7 +16,7 @@ export function getCart() {
         return { v: CART_VERSION, items: [] };
     }
 
-    return { v: CART_VERSION, items: cart.items.filter(isValidItem) };
+    return { v: CART_VERSION, items: cart.items.map(normalizeProduct).filter(isValidItem) };
 }
 
 /** @returns {{ added: number, qty: number, maxQty: number }} added = tiket yang benar-benar masuk */
@@ -37,6 +38,24 @@ export function addItem(item) {
     saveCart(cart);
 
     return { added: qty - before, qty, maxQty };
+}
+
+/** Produk toko: key `product:<slug>` agar qty dijumlahkan untuk slug yang sama. */
+export function addProduct({ slug, name, price, image }, qty) {
+    return addItem({
+        type: 'product',
+        key: `product:${slug}`,
+        id: slug,
+        name,
+        price,
+        image: image || null,
+        qty,
+        maxQty: PRODUCT_MAX_QTY,
+    });
+}
+
+export function isProductItem(item) {
+    return item.type === 'product';
 }
 
 /** Sidik isi keranjang (key + qty) untuk mendeteksi perubahan. */
@@ -113,12 +132,32 @@ function clampQty(qty, maxQty) {
 }
 
 const TEXT_FIELDS = ['key', 'operator', 'vehicle', 'origin', 'destination', 'date', 'dateLabel', 'depart', 'arrive'];
+const PRODUCT_FIELDS = ['key', 'id', 'name'];
+
+/** Batas qty produk ditentukan kode, bukan localStorage; qty berlebih dijepit ke batas. */
+function normalizeProduct(item) {
+    if (item === null || typeof item !== 'object' || !isProductItem(item)) {
+        return item;
+    }
+
+    return {
+        ...item,
+        maxQty: PRODUCT_MAX_QTY,
+        qty: Number.isInteger(item.qty) ? Math.min(item.qty, PRODUCT_MAX_QTY) : item.qty,
+    };
+}
 
 /** Data dari localStorage tidak dipercaya: tipe & rentang wajib benar. */
-function isValidItem(item) {
-    return item !== null
-        && typeof item === 'object'
-        && TEXT_FIELDS.every((field) => typeof item[field] === 'string')
+export function isValidItem(item) {
+    if (item === null || typeof item !== 'object') {
+        return false;
+    }
+    const hasFields = isProductItem(item)
+        ? PRODUCT_FIELDS.every((field) => typeof item[field] === 'string')
+            && (item.image === null || typeof item.image === 'string')
+        : TEXT_FIELDS.every((field) => typeof item[field] === 'string');
+
+    return hasFields
         && Number.isFinite(item.price) && item.price > 0
         && Number.isInteger(item.maxQty) && item.maxQty >= 1
         && Number.isInteger(item.qty) && item.qty >= 1 && item.qty <= item.maxQty;

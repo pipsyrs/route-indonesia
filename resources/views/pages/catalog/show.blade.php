@@ -120,7 +120,7 @@
 
                     <div class="mt-5 flex items-center justify-between gap-4">
                         <label for="jumlah-tiket" class="text-sm font-medium text-ink">Jumlah tiket</label>
-                        <div class="flex items-center rounded-xl border border-line-strong">
+                        <div class="flex items-center rounded-md border border-line-strong">
                             <button type="button" class="grid size-10 place-items-center text-ink-muted hover:text-ink disabled:opacity-40" data-qty-step="-1" @disabled($isSoldOut)>
                                 <x-icon name="minus" class="size-4" />
                                 <span class="sr-only">Kurangi</span>
@@ -147,7 +147,7 @@
                     </button>
 
                     {{-- Muncul setelah item ditambahkan --}}
-                    <div class="mt-4 rounded-xl bg-ok-soft p-4 text-sm text-ok-ink" data-added-notice role="status" hidden>
+                    <div class="mt-4 rounded-md bg-ok-soft p-4 text-sm text-ok-ink" data-added-notice role="status" hidden>
                         <p class="flex items-center gap-2 font-semibold"><x-icon name="circle-check" class="size-5" /> Ditambahkan ke keranjang</p>
                         <a href="{{ route('cart') }}" class="btn-primary mt-3 w-full">Lihat keranjang</a>
                     </div>

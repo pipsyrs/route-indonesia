@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
             FleetSeeder::class,
             ScheduleSeeder::class,
             SampleBookingSeeder::class,
+            TestimonialSeeder::class,
         ]);
     }
 }

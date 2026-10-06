@@ -46,14 +46,11 @@
             @endforeach
         </ul>
 
-        @if ($notice || $passengersReduced)
-            <div class="mt-6 flex items-start gap-3 rounded-xl bg-warn-soft p-4 text-sm text-warn-ink" role="alert">
+        @if ($notice)
+            <div class="mt-6 flex items-start gap-3 rounded-md bg-warn-soft p-4 text-sm text-warn-ink" role="alert">
                 <x-icon name="alert-circle" class="size-5" />
                 <p>
                     {{ $notice }}
-                    @if ($passengersReduced)
-                        Sisa kursi di jadwal ini {{ $trip['seats_left'] }}, jadi jumlah penumpang disesuaikan menjadi {{ $passengers }}.
-                    @endif
                 </p>
             </div>
         @endif
@@ -78,13 +75,13 @@
                     </div>
 
                     <div class="mt-5 flex flex-col gap-6 sm:flex-row sm:items-start">
-                        <fieldset class="w-fit rounded-2xl border border-line bg-surface p-4 sm:p-5">
+                        <fieldset class="w-fit rounded-lg border border-line bg-surface p-4 sm:p-5">
                             <legend class="sr-only">Denah kursi, bagian depan kendaraan di atas</legend>
                             <div class="grid grid-cols-4 gap-2.5">
                                 @foreach ($seatMap as $row)
                                     @foreach ($row as $cell)
                                         @if ($cell === 'D')
-                                            <span class="grid size-12 place-items-center rounded-xl bg-surface-muted text-ink-subtle" title="Sopir">
+                                            <span class="grid size-12 place-items-center rounded-md bg-surface-muted text-ink-subtle" title="Sopir">
                                                 <x-icon name="steering-wheel" class="size-6" />
                                                 <span class="sr-only">Sopir</span>
                                             </span>
@@ -98,7 +95,7 @@
                                                        aria-label="Kursi {{ $cell }}, {{ $isOccupied ? 'terisi' : 'tersedia' }}"
                                                        @disabled($isOccupied)>
                                                 <span @class([
-                                                    'grid size-12 place-items-center rounded-xl border text-sm font-semibold tabular-nums transition',
+                                                    'grid size-12 place-items-center rounded-md border text-sm font-semibold tabular-nums transition',
                                                     'border-transparent bg-seat-occupied text-ink-subtle line-through' => $isOccupied,
                                                     'border-line-strong bg-seat-available text-ink hover:border-brand-500 peer-checked:border-seat-selected peer-checked:bg-seat-selected peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-brand-500 active:scale-95' => ! $isOccupied,
                                                 ])>{{ $cell }}</span>
@@ -128,7 +125,7 @@
                                     <input type="radio" name="{{ $field }}" value="{{ $stop['id'] }}" class="peer sr-only"
                                            data-stop="{{ $field }}" data-stop-label="{{ $stop['name'] }} ({{ $stop['time'] }})"
                                            @checked($loop->first)>
-                                    <span class="flex h-full gap-3 rounded-2xl border border-line bg-surface p-4 transition-colors hover:border-brand-500 peer-checked:border-brand-600 peer-checked:bg-brand-soft peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-brand-500">
+                                    <span class="flex h-full gap-3 rounded-lg border border-line bg-surface p-4 transition-colors hover:border-brand-500 peer-checked:border-brand-600 peer-checked:bg-brand-soft peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-brand-500">
                                         <x-icon :name="$icon" class="mt-0.5 size-5 text-brand-ink" />
                                         <span class="min-w-0 flex-1">
                                             <span class="flex items-baseline justify-between gap-3">

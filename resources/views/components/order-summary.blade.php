@@ -15,7 +15,7 @@
 <section {{ $attributes->merge(['class' => 'card p-5 sm:p-6']) }} aria-labelledby="ringkasan-title">
     <h2 id="ringkasan-title" class="text-base font-bold text-ink">Ringkasan pesanan</h2>
 
-    <div class="mt-4 rounded-xl bg-surface-muted p-4">
+    <div class="mt-4 rounded-md bg-surface-muted p-4">
         <p class="flex items-center gap-2 font-semibold text-ink">
             {{ $trip['origin'] }}
             <x-icon name="arrow-right" class="size-4 text-ink-subtle" />

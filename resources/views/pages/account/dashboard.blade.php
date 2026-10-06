@@ -10,7 +10,7 @@
 
         <div class="min-w-0 space-y-8">
             {{-- Sapaan sebagai focal point --}}
-            <section class="rounded-3xl bg-brand-600 p-6 text-white sm:p-8">
+            <section class="rounded-lg bg-brand-600 p-6 text-white sm:p-8">
                 <p class="text-sm text-brand-100">Halo,</p>
                 <h1 class="mt-1 text-3xl font-extrabold tracking-tight">{{ $user['name'] }}</h1>
                 <p class="mt-2 text-sm text-brand-100">

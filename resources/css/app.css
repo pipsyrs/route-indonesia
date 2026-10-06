@@ -1,5 +1,5 @@
 @import 'tailwindcss';
-@import '@fontsource-variable/plus-jakarta-sans';
+@import '@fontsource-variable/montserrat';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
@@ -7,21 +7,21 @@
 @source '../**/*.js';
 
 @theme {
-    --font-sans: 'Plus Jakarta Sans Variable', 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif,
+    --font-sans: 'Montserrat Variable', 'Montserrat', ui-sans-serif, system-ui, sans-serif,
         'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 
-    /* Brand utama: biru laut (satu-satunya warna aksen untuk aksi) */
-    --color-brand-50: #eef6ff;
-    --color-brand-100: #d9eaff;
-    --color-brand-200: #bcdaff;
-    --color-brand-300: #8ec3ff;
-    --color-brand-400: #59a1ff;
-    --color-brand-500: #337dfc;
-    --color-brand-600: #1d5ef1;
-    --color-brand-700: #1549d6;
-    --color-brand-800: #183ead;
-    --color-brand-900: #193988;
-    --color-brand-950: #142453;
+    /* Brand utama: olive gelap, 600 = #3C3410 (satu-satunya warna aksen untuk aksi) */
+    --color-brand-50: #f9f7ee;
+    --color-brand-100: #f2edd8;
+    --color-brand-200: #e2dab5;
+    --color-brand-300: #c4b883;
+    --color-brand-400: #9a8c52;
+    --color-brand-500: #665b29;
+    --color-brand-600: #3c3410;
+    --color-brand-700: #2d2609;
+    --color-brand-800: #1f1b06;
+    --color-brand-900: #151203;
+    --color-brand-950: #0a0701;
 
     /* Oranye dipakai hanya untuk status peringatan (kursi menipis, waktu bayar hampir habis) */
     --color-accent-50: #fff7ed;
@@ -42,8 +42,8 @@
     --color-ink: #0f172a;
     --color-ink-muted: #475569;
     --color-ink-subtle: #64748b;
-    --color-brand-ink: #1549d6;
-    --color-brand-soft: #eef6ff;
+    --color-brand-ink: #3c3410;
+    --color-brand-soft: #f9f7ee;
     --color-warn-ink: #c2410c;
     --color-warn-soft: #fff7ed;
     --color-ok-ink: #047857;
@@ -54,7 +54,7 @@
     /* Status kursi */
     --color-seat-available: #fdfdfe;
     --color-seat-occupied: #cbd5e1;
-    --color-seat-selected: #1d5ef1;
+    --color-seat-selected: #3c3410;
 }
 
 @layer base {
@@ -64,7 +64,14 @@
     }
 
     body {
-        @apply bg-canvas text-ink antialiased;
+        @apply bg-canvas font-light text-ink antialiased;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4 {
+        @apply font-semibold;
     }
 
     /* Focus state yang konsisten & terlihat untuk navigasi keyboard */
@@ -92,15 +99,15 @@
 }
 
 /*
- * Sistem sudut: kontrol (tombol, input, kursi) 12px, wadah (kartu, panel) 16px,
+ * Sistem sudut: kontrol (tombol, input, kursi) 6px, wadah (kartu, panel) 8px,
  * chip/badge penuh (pill). Dipakai konsisten di seluruh halaman.
  */
 @utility btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold whitespace-nowrap transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100;
+    @apply inline-flex items-center justify-center gap-2 rounded-md px-5 py-2.5 text-sm font-semibold whitespace-nowrap transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100;
 }
 
 @utility btn-primary {
-    @apply btn bg-brand-600 text-white shadow-sm shadow-brand-600/20 hover:bg-brand-700;
+    @apply btn bg-brand-600 text-white shadow-sm shadow-brand-600/20 hover:bg-brand-500;
 }
 
 @utility btn-accent {
@@ -120,7 +127,7 @@
 }
 
 @utility form-input {
-    @apply block w-full rounded-xl border border-line-strong bg-surface px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-subtle focus:border-brand-500 focus:ring-2 focus:ring-brand-500/25 focus:outline-none aria-invalid:border-danger-ink;
+    @apply block w-full rounded-md border border-line-strong bg-surface px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-subtle focus:border-brand-500 focus:ring-2 focus:ring-brand-500/25 focus:outline-none aria-invalid:border-danger-ink;
 }
 
 @utility form-error {
@@ -132,7 +139,7 @@
 }
 
 @utility card {
-    @apply rounded-2xl border border-line bg-surface shadow-[0_1px_2px_rgb(15_23_42/0.04)];
+    @apply rounded-lg border border-line bg-surface shadow-[0_1px_2px_rgb(15_23_42/0.04)];
 }
 
 @utility chip {
@@ -141,6 +148,19 @@
 
 @utility container-page {
     @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+}
+
+/*
+ * Grid produk: garis antar baris menyambung penuh, garis antar kolom terputus (inset).
+ * Garis diletakkan 1px di luar item lalu dipotong overflow, jadi tepi luar grid bersih
+ * di semua jumlah kolom tanpa hitungan nth-child.
+ */
+@utility product-grid {
+    @apply grid grid-cols-2 overflow-hidden;
+
+    & > li {
+        @apply relative py-8 before:absolute before:inset-x-0 before:-top-px before:h-px before:bg-line after:absolute after:inset-y-8 after:-right-px after:w-px after:bg-line;
+    }
 }
 
 /* Kerangka loading (cek pesanan) */

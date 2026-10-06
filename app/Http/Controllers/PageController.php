@@ -62,7 +62,7 @@ class PageController extends Controller
             'popularRoutes' => $this->popularRoutes(),
             'promos' => $this->promos(),
             'testimonials' => $this->testimonials(),
-            'features' => $this->features(),
+            'products' => $this->products(),
             'defaultDate' => $this->tomorrow()->toDateString(),
         ]);
     }
@@ -179,6 +179,38 @@ class PageController extends Controller
     public function checkOrder(): View
     {
         return view('pages.cek-pesanan');
+    }
+
+    public function shop(): View
+    {
+        return view('pages.shop', ['products' => $this->products()]);
+    }
+
+    public function productShow(string $slug): View
+    {
+        $products = collect($this->products());
+        $product = $products->firstWhere('slug', $slug) ?? abort(404);
+
+        return view('pages.shop-show', [
+            'product' => $product,
+            'related' => $products->where('slug', '!=', $slug)->take(3)->values()->all(),
+        ]);
+    }
+
+    /** Nama `trip()` dan `trips()` sudah dipakai alur lama. */
+    public function tripPage(): View
+    {
+        return view('pages.trips');
+    }
+
+    public function collaboration(): View
+    {
+        return view('pages.collaboration');
+    }
+
+    public function career(): View
+    {
+        return view('pages.career');
     }
 
     /* ------------------------------------------------------------------ */
@@ -510,7 +542,7 @@ class PageController extends Controller
     {
         return Testimonial::published()
             ->latest('id')
-            ->limit(6)
+            ->limit(9)
             ->get()
             ->map(fn (Testimonial $testimonial) => [
                 'name' => $testimonial->name,
@@ -521,14 +553,74 @@ class PageController extends Controller
             ->all();
     }
 
-    /** Konten statis (bukan tabel), keputusan spesifikasi 01/02. */
-    private function features(): array
+    /**
+     * Produk dummy untuk home & shop (belum ada tabel).
+     *
+     * @return list<array{slug: string, name: string, brand: string, category: string, price: int, description: string, image: ?string, badge: ?string}>
+     */
+    private function products(): array
     {
         return [
-            ['icon' => 'shield-check', 'title' => 'Operator terverifikasi', 'desc' => 'Semua mitra travel telah melalui verifikasi izin dan armada.'],
-            ['icon' => 'armchair', 'title' => 'Pilih kursi sendiri', 'desc' => 'Lihat denah kursi dan pilih posisi favorit sebelum membayar.'],
-            ['icon' => 'wallet', 'title' => 'Bayar mudah', 'desc' => 'Virtual Account, e-wallet, hingga QRIS. Tanpa biaya tersembunyi.'],
-            ['icon' => 'headset', 'title' => 'Bantuan 24/7', 'desc' => 'Tim kami siap membantu kapan saja lewat chat maupun telepon.'],
+            [
+                'slug' => 'travel-neck-pillow',
+                'name' => __('Travel Neck Pillow'),
+                'brand' => 'RouteIndonesia',
+                'category' => __('Travel Accessories'),
+                'price' => 85000,
+                'description' => __('Soft memory foam pillow for long road trips.'),
+                'image' => 'https://picsum.photos/seed/routeindonesia-travel-neck-pillow/800/800',
+                'badge' => __('Best Seller'),
+            ],
+            [
+                'slug' => 'waterproof-daypack',
+                'name' => __('Waterproof Daypack'),
+                'brand' => 'RouteIndonesia',
+                'category' => __('Bags'),
+                'price' => 249000,
+                'description' => __('Lightweight 20L backpack that keeps your gear dry.'),
+                'image' => 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800&q=80&auto=format&fit=crop',
+                'badge' => __('New'),
+            ],
+            [
+                'slug' => 'universal-travel-adapter',
+                'name' => __('Universal Travel Adapter'),
+                'brand' => 'RouteIndonesia',
+                'category' => __('Electronics'),
+                'price' => 129000,
+                'description' => __('One adapter with USB ports for over 150 countries.'),
+                'image' => 'https://picsum.photos/seed/routeindonesia-universal-travel-adapter/800/800',
+                'badge' => null,
+            ],
+            [
+                'slug' => 'packing-cube-set',
+                'name' => __('Packing Cube Set'),
+                'brand' => 'RouteIndonesia',
+                'category' => __('Travel Accessories'),
+                'price' => 159000,
+                'description' => __('Three-piece set to keep your luggage neat and organized.'),
+                'image' => 'https://picsum.photos/seed/routeindonesia-packing-cube-set/800/800',
+                'badge' => null,
+            ],
+            [
+                'slug' => 'cabin-suitcase',
+                'name' => __('Cabin Suitcase'),
+                'brand' => 'RouteIndonesia',
+                'category' => __('Luggage'),
+                'price' => 649000,
+                'description' => __('Hard-shell 20-inch carry-on with smooth spinner wheels.'),
+                'image' => 'https://picsum.photos/seed/routeindonesia-cabin-suitcase/800/800',
+                'badge' => __('Best Seller'),
+            ],
+            [
+                'slug' => 'leather-weekender-bag',
+                'name' => __('Leather Weekender Bag'),
+                'brand' => 'RouteIndonesia',
+                'category' => __('Bags'),
+                'price' => 899000,
+                'description' => __('Spacious leather duffel for short getaways out of town.'),
+                'image' => 'https://picsum.photos/seed/routeindonesia-leather-weekender-bag/800/800',
+                'badge' => __('New'),
+            ],
         ];
     }
 

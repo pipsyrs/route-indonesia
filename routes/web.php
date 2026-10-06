@@ -1,15 +1,26 @@
 <?php
 
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ShopController;
+use App\Http\Middleware\SetLocale;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::controller(PageController::class)->group(function () {
     Route::get('/', 'home')->name('home');
     Route::get('/cek-pesanan', 'checkOrder')->name('order.check');
+    Route::get('/shop', 'shop')->name('shop');
+    Route::get('/shop/{slug}', 'productShow')->where('slug', '[a-z0-9-]+')->name('shop.show');
+    Route::get('/trip', 'tripPage')->name('trip');
+    Route::get('/kolaborasi', 'collaboration')->name('collaboration');
+    Route::get('/karir', 'career')->name('career');
 });
+
+Route::get('/lang/{locale}', LocaleController::class)
+    ->whereIn('locale', SetLocale::SUPPORTED)
+    ->name('locale.switch');
 
 Route::controller(ShopController::class)->group(function () {
     Route::get('/katalog', 'index')->name('catalog.index');

@@ -105,13 +105,14 @@ class TripPresenter
         ];
     }
 
-    /** 180 → "± 3 jam", 210 → "± 3,5 jam" (dibulatkan ke setengah jam terdekat). */
+    /** 210 → "± 3.5 hrs" (EN) / "± 3,5 jam" (ID), dibulatkan ke setengah jam terdekat. */
     public static function formatApproxHours(int $minutes): string
     {
         $hours = round($minutes / 60 * 2) / 2;
-        $label = fmod($hours, 1.0) === 0.0 ? (string) (int) $hours : number_format($hours, 1, ',', '');
+        $decimal = app()->getLocale() === 'id' ? ',' : '.';
+        $label = fmod($hours, 1.0) === 0.0 ? (string) (int) $hours : number_format($hours, 1, $decimal, '');
 
-        return "± {$label} jam";
+        return __('± :hours hrs', ['hours' => $label]);
     }
 
     private static function presentStops(Schedule $schedule, string $type): array

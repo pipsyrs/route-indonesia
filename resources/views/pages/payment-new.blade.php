@@ -23,7 +23,7 @@
         <div class="mt-6 grid gap-6 lg:grid-cols-[1fr_22rem] lg:gap-8" data-payment-ready hidden>
             <div class="min-w-0 space-y-6">
                 {{-- Hitung mundur: focal point halaman --}}
-                <section class="flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-brand-soft p-5 text-brand-ink outline-none sm:p-6" tabindex="-1" data-countdown>
+                <section class="flex flex-wrap items-center justify-between gap-4 rounded-lg bg-brand-soft p-5 text-brand-ink outline-none sm:p-6" tabindex="-1" data-countdown>
                     <div>
                         <p class="text-sm font-medium">Selesaikan pembayaran dalam</p>
                         <p class="mt-1 text-4xl font-extrabold tracking-tight tabular-nums" data-countdown-value aria-live="off">30:00</p>
@@ -34,7 +34,7 @@
                     </div>
                 </section>
 
-                <section class="items-start gap-3 rounded-2xl bg-danger-soft p-5 text-danger-ink" data-payment-expired hidden role="alert">
+                <section class="items-start gap-3 rounded-lg bg-danger-soft p-5 text-danger-ink" data-payment-expired hidden role="alert">
                     <div class="flex items-start gap-3">
                         <x-icon name="circle-x" class="size-6" />
                         <div>
@@ -59,7 +59,7 @@
                     </div>
 
                     {{-- Virtual account --}}
-                    <div class="mt-5 rounded-xl border border-dashed border-line-strong p-4" data-va-panel hidden>
+                    <div class="mt-5 rounded-md border border-dashed border-line-strong p-4" data-va-panel hidden>
                         <p class="text-xs text-ink-subtle">Nomor virtual account</p>
                         <div class="mt-1 flex flex-wrap items-center justify-between gap-3">
                             <p class="font-mono text-xl font-bold tracking-wider text-ink" data-va-number></p>
@@ -71,7 +71,7 @@
                     </div>
 
                     {{-- QRIS: placeholder, bukan QR asli --}}
-                    <div class="mt-5 flex flex-col items-center rounded-xl border border-dashed border-line-strong p-5 text-center" data-qris-panel hidden>
+                    <div class="mt-5 flex flex-col items-center rounded-md border border-dashed border-line-strong p-5 text-center" data-qris-panel hidden>
                         <div class="grid size-44 grid-cols-8 gap-0.5 rounded-lg bg-white p-2 ring-1 ring-line" aria-hidden="true" data-qris-art></div>
                         <p class="mt-3 font-mono text-xs text-ink-subtle" data-qris-payload></p>
                         <p class="mt-1 text-xs text-ink-subtle">Tampilan contoh, bukan kode QR yang bisa dipindai.</p>

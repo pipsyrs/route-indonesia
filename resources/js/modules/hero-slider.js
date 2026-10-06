@@ -43,7 +43,9 @@ export function initHeroSlider(root) {
     const renderToggle = () => {
         toggle.querySelector('[data-slider-icon="pause"]').classList.toggle('hidden', isPaused);
         toggle.querySelector('[data-slider-icon="play"]').classList.toggle('hidden', !isPaused);
-        toggle.querySelector('[data-slider-toggle-label]').textContent = isPaused ? 'Putar slide otomatis' : 'Jeda slide otomatis';
+        toggle.querySelector('[data-slider-toggle-label]').textContent = isPaused
+            ? (toggle.dataset.labelPlay ?? 'Putar slide otomatis')
+            : (toggle.dataset.labelPause ?? 'Jeda slide otomatis');
     };
     toggle?.addEventListener('click', () => {
         isPaused = !isPaused;

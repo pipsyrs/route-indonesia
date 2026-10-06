@@ -10,7 +10,7 @@
 
         <div class="mx-auto mt-8 max-w-3xl">
             <header class="flex flex-col items-start gap-4 sm:flex-row sm:items-center print:hidden">
-                <span class="grid size-14 shrink-0 place-items-center rounded-2xl bg-ok-soft text-ok-ink">
+                <span class="grid size-14 shrink-0 place-items-center rounded-lg bg-ok-soft text-ok-ink">
                     <x-icon name="circle-check" class="size-8" />
                 </span>
                 <div>
@@ -77,7 +77,7 @@
                     <h3 class="text-sm font-bold text-ink">Penumpang</h3>
                     <ul class="mt-3 grid gap-2 sm:grid-cols-2" data-ticket-passengers data-order-key="{{ $trip['id'] }}:{{ implode(',', $seats) }}">
                         @foreach ($seats as $index => $seat)
-                            <li class="flex items-center justify-between gap-3 rounded-xl bg-surface-muted px-4 py-3 text-sm" data-ticket-passenger="{{ $seat }}">
+                            <li class="flex items-center justify-between gap-3 rounded-md bg-surface-muted px-4 py-3 text-sm" data-ticket-passenger="{{ $seat }}">
                                 <span class="font-medium text-ink" data-ticket-passenger-name>Penumpang {{ $index + 1 }}</span>
                                 <span class="text-ink-muted">Kursi {{ $seat }}</span>
                             </li>

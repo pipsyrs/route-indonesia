@@ -51,7 +51,7 @@
 
     <div class="container-page py-8">
         @if ($searchError)
-            <div class="mb-6 flex items-start gap-3 rounded-xl bg-warn-soft p-4 text-sm text-warn-ink" role="alert">
+            <div class="mb-6 flex items-start gap-3 rounded-md bg-warn-soft p-4 text-sm text-warn-ink" role="alert">
                 <x-icon name="alert-circle" class="size-5" />
                 <p>{{ $searchError }}</p>
             </div>
@@ -60,7 +60,7 @@
         @if ($trips === [])
             {{-- Empty state dari server: rute/tanggal tanpa jadwal --}}
             <div class="mx-auto flex max-w-lg flex-col items-center py-16 text-center">
-                <span class="grid size-14 place-items-center rounded-2xl bg-surface-muted text-ink-subtle">
+                <span class="grid size-14 place-items-center rounded-lg bg-surface-muted text-ink-subtle">
                     <x-icon name="bus" class="size-7" />
                 </span>
                 <h2 class="mt-5 text-lg font-bold text-ink">Belum ada jadwal untuk pencarian ini</h2>
@@ -94,7 +94,7 @@
                                 @foreach (['pagi' => ['Pagi', '00-11', 'sunrise'], 'siang' => ['Siang', '11-15', 'sun'], 'sore' => ['Sore', '15-18', 'sunset'], 'malam' => ['Malam', '18-24', 'moon']] as $slot => [$label, $range, $icon])
                                     <label class="cursor-pointer">
                                         <input type="checkbox" name="time" value="{{ $slot }}" class="peer sr-only">
-                                        <span class="flex flex-col items-center gap-1 rounded-xl border border-line bg-surface px-2 py-2.5 text-center text-xs text-ink-muted transition-colors peer-checked:border-brand-600 peer-checked:bg-brand-soft peer-checked:text-brand-ink peer-focus-visible:outline-2 peer-focus-visible:outline-brand-500">
+                                        <span class="flex flex-col items-center gap-1 rounded-md border border-line bg-surface px-2 py-2.5 text-center text-xs text-ink-muted transition-colors peer-checked:border-brand-600 peer-checked:bg-brand-soft peer-checked:text-brand-ink peer-focus-visible:outline-2 peer-focus-visible:outline-brand-500">
                                             <x-icon :name="$icon" class="size-5" />
                                             <span class="font-semibold">{{ $label }}</span>
                                             <span>{{ $range }}</span>
@@ -173,7 +173,7 @@
                     </div>
 
                     {{-- Empty state sisi klien: filter tidak menyisakan jadwal --}}
-                    <div class="flex flex-col items-center rounded-2xl border border-dashed border-line-strong px-6 py-12 text-center" data-filter-empty hidden>
+                    <div class="flex flex-col items-center rounded-lg border border-dashed border-line-strong px-6 py-12 text-center" data-filter-empty hidden>
                         <x-icon name="search" class="size-7 text-ink-subtle" />
                         <h2 class="mt-4 font-bold text-ink">Tidak ada jadwal yang cocok</h2>
                         <p class="mt-1 text-sm text-ink-muted">Longgarkan filter untuk melihat jadwal lain.</p>

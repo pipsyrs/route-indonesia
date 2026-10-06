@@ -35,4 +35,13 @@ return [
         ],
     ],
 
+    // Hanya URL https dengan host; kosong/invalid = null (lihat SafeUrl).
+    'social' => [
+        'instagram' => \App\Support\SafeUrl::https(env('SOCIAL_INSTAGRAM_URL')),
+        'tiktok' => \App\Support\SafeUrl::https(env('SOCIAL_TIKTOK_URL')),
+        'facebook' => \App\Support\SafeUrl::https(env('SOCIAL_FACEBOOK_URL')),
+    ],
+
+    'community_url' => \App\Support\SafeUrl::https(env('COMMUNITY_URL')),
+
 ];

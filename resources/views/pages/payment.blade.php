@@ -19,7 +19,7 @@
         <h1 class="mt-3 text-2xl font-bold tracking-tight text-ink md:text-3xl">Pilih metode pembayaran</h1>
 
         {{-- Countdown: deadline pertama disimpan JS per pesanan agar refresh tidak mereset --}}
-        <div class="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-brand-soft p-4 text-brand-ink sm:p-5"
+        <div class="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-lg bg-brand-soft p-4 text-brand-ink sm:p-5"
              data-countdown data-deadline="{{ $deadline }}" data-order-key="{{ $trip['id'] }}:{{ implode(',', $seats) }}" role="timer">
             <p class="flex items-center gap-2.5 text-sm font-medium">
                 <x-icon name="hourglass" class="size-5" />
@@ -28,7 +28,7 @@
             <p class="text-2xl font-bold tabular-nums" data-countdown-value aria-live="off">30:00</p>
         </div>
 
-        <div class="mt-4 hidden flex-wrap items-center justify-between gap-3 rounded-2xl bg-danger-soft p-4 text-danger-ink" data-countdown-expired role="alert">
+        <div class="mt-4 hidden flex-wrap items-center justify-between gap-3 rounded-lg bg-danger-soft p-4 text-danger-ink" data-countdown-expired role="alert">
             <p class="flex items-center gap-2.5 text-sm font-medium">
                 <x-icon name="circle-x" class="size-5" />
                 Waktu pembayaran habis. Kursi Anda dilepas.
@@ -52,7 +52,7 @@
                                 <label class="cursor-pointer">
                                     <input type="radio" name="method" value="{{ $method['id'] }}" class="peer sr-only"
                                            data-method data-method-group="{{ $group }}" data-method-name="{{ $method['name'] }}" required>
-                                    <span class="flex items-center gap-3 rounded-2xl border border-line bg-surface p-4 transition-colors hover:border-brand-500 peer-checked:border-brand-600 peer-checked:bg-brand-soft peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-brand-500">
+                                    <span class="flex items-center gap-3 rounded-lg border border-line bg-surface p-4 transition-colors hover:border-brand-500 peer-checked:border-brand-600 peer-checked:bg-brand-soft peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-brand-500">
                                         <span class="grid h-9 w-12 shrink-0 place-items-center rounded-lg border border-line bg-canvas text-[11px] font-bold tracking-wide text-ink">{{ $method['short'] }}</span>
                                         <span class="text-sm font-semibold text-ink">{{ $method['name'] }}</span>
                                     </span>
@@ -63,7 +63,7 @@
                 @endforeach
 
                 {{-- Instruksi per grup; ditampilkan JS sesuai metode terpilih --}}
-                <section class="rounded-2xl border border-dashed border-line-strong p-5" aria-live="polite" data-instructions>
+                <section class="rounded-lg border border-dashed border-line-strong p-5" aria-live="polite" data-instructions>
                     <p class="flex items-center gap-2.5 text-sm text-ink-muted" data-instruction="none">
                         <x-icon name="info-circle" class="size-5" />
                         Pilih metode untuk melihat cara pembayaran.

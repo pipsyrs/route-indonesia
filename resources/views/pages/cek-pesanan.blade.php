@@ -7,7 +7,7 @@
 @section('content')
     <div class="container-page grid gap-10 py-10 md:py-14 lg:grid-cols-[1fr_1.1fr] lg:items-start">
         <div class="max-w-md">
-            <span class="grid size-12 place-items-center rounded-xl bg-brand-soft text-brand-ink">
+            <span class="grid size-12 place-items-center rounded-md bg-brand-soft text-brand-ink">
                 <x-icon name="ticket" class="size-6" />
             </span>
             <h1 class="mt-5 text-3xl font-bold tracking-tight text-ink md:text-4xl">Cek status pesanan</h1>
@@ -42,7 +42,7 @@
                     Cek pesanan
                 </button>
 
-                <p id="cek-fase-info" class="flex items-start gap-2 rounded-xl bg-surface-muted p-3 text-xs text-ink-muted">
+                <p id="cek-fase-info" class="flex items-start gap-2 rounded-md bg-surface-muted p-3 text-xs text-ink-muted">
                     <x-icon name="info-circle" class="size-4" />
                     Pengecekan pesanan sedang disiapkan dan aktif di fase berikutnya. Untuk bantuan sekarang, hubungi (021) 5089-1234.
                 </p>

@@ -24,7 +24,7 @@
                 <p id="masuk-sandi-error" class="form-error" hidden></p>
             </div>
             <button type="submit" class="btn-primary w-full py-3">Masuk</button>
-            <p class="rounded-xl bg-surface-muted px-3.5 py-2.5 text-xs text-ink-subtle">
+            <p class="rounded-md bg-surface-muted px-3.5 py-2.5 text-xs text-ink-subtle">
                 <span class="font-semibold text-ink-muted">Mode demo.</span> Kata sandi tidak dikirim ke mana pun.
             </p>
         </form>
