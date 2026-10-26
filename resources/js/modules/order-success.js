@@ -1,7 +1,10 @@
-import { LAST_ORDER_KEY, isProductItem, isValidItem } from './cart';
+import { LAST_ORDER_KEY, SESSION_KEY, isProductItem, isValidItem } from './cart';
 import { AWAITING_CONFIRMATION } from './checkout-payment';
+import { openModal } from './modal';
 import { formatRupiah } from './utils/format';
-import { readLocal, writeLocal } from './utils/storage';
+import { readLocal, readSession, writeLocal, writeSession } from './utils/storage';
+
+const GUEST_PROMPTED_KEY = 'ri_guest_prompted';
 
 export function initOrderSuccess(root) {
     const page = root.querySelector('[data-success-root]');
@@ -60,10 +63,22 @@ export function initOrderSuccess(root) {
 
     page.querySelector('[data-print]').addEventListener('click', () => window.print());
     page.querySelector('[data-success-ready]').hidden = false;
+    promptGuest(order.bookingCode);
 
     // Data pribadi cukup tampil sekali; simpan ringkasan saja untuk refresh.
     if (order.contact || order.passengers) {
         const { contact, passengers, ...summary } = order;
         writeLocal(LAST_ORDER_KEY, summary);
     }
+}
+
+/** Tamu: ajak buat akun, cukup sekali per kode booking (reload tidak mengulang). */
+function promptGuest(bookingCode) {
+    const session = readLocal(SESSION_KEY);
+    const isUser = typeof session?.name === 'string' && session.name.trim() !== '';
+    if (isUser || readSession(GUEST_PROMPTED_KEY) === bookingCode) {
+        return;
+    }
+    writeSession(GUEST_PROMPTED_KEY, bookingCode);
+    openModal('success-guest-modal');
 }

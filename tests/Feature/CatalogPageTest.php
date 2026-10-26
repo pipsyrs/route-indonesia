@@ -18,7 +18,81 @@ class CatalogPageTest extends TestCase
             ->assertViewHas('searchError', null)
             ->assertViewHas('query', fn (array $query) => $query['from'] === null
                 && $query['to'] === null
-                && $query['date'] === $this->tomorrow());
+                && $query['q'] === null
+                && $query['date'] === null
+                && $query['date_label'] === null)
+            ->assertDontSee('Berangkat '.now()->addDay()->locale('id')->translatedFormat('l'), false)
+            ->assertSee('name="q"', false)
+            ->assertDontSee('name="from"', false);
+    }
+
+    #[DataProvider('keywordSearches')]
+    public function test_it_should_filter_trips_by_keyword_case_insensitively(string $keyword, array $ids): void
+    {
+        $this->get('/katalog?q='.urlencode($keyword))
+            ->assertOk()
+            ->assertViewHas('query', fn (array $query) => $query['q'] === trim($keyword))
+            ->assertViewHas('trips', fn (array $trips) => array_column($trips, 'id') === $ids)
+            ->assertSee('Hasil pencarian');
+    }
+
+    /** @return array<string, array{0: string, 1: list<int>}> */
+    public static function keywordSearches(): array
+    {
+        return [
+            'kota' => ['bandung', [1, 2, 3, 4]],
+            'nama rute' => ['PAPANDAYAN', [1, 2, 3, 4]],
+            'operator' => ['  cipaganti ', [1]],
+            'kendaraan' => ['elf', [3, 9]],
+        ];
+    }
+
+    public function test_it_should_show_empty_state_when_keyword_has_no_match(): void
+    {
+        $this->get('/katalog?q=zzz')
+            ->assertOk()
+            ->assertViewHas('trips', [])
+            ->assertSee('Belum ada jadwal untuk pencarian ini')
+            ->assertSee('Coba kata kunci lain');
+    }
+
+    public function test_it_should_escape_keyword_in_title_heading_and_inputs(): void
+    {
+        $this->get('/katalog?'.http_build_query(['q' => '"><script>alert(1)</script>', 'date' => $this->tomorrow()]))
+            ->assertOk()
+            ->assertDontSee('<script>alert(1)</script>', false)
+            ->assertSee('&quot;&gt;&lt;script&gt;alert(1)&lt;/script&gt;', false);
+    }
+
+    public function test_it_should_ignore_array_keyword_and_cap_its_length(): void
+    {
+        $this->get('/katalog?q[]=bandung')
+            ->assertOk()
+            ->assertViewHas('trips', fn (array $trips) => count($trips) === count(DummyShop::trips()));
+
+        $this->get('/katalog?q='.str_repeat('a', 150))
+            ->assertOk()
+            ->assertViewHas('query', fn (array $query) => mb_strlen($query['q']) === 100);
+    }
+
+    public function test_it_should_filter_named_route_and_return_not_found_for_unknown_slug(): void
+    {
+        $this->get('/katalog?route=bromo')
+            ->assertOk()
+            ->assertViewHas('trips', fn (array $trips) => array_column($trips, 'id') === [8, 9]);
+
+        $this->get('/katalog?route=atlantis')->assertNotFound();
+    }
+
+    public function test_it_should_pass_selected_date_to_header_and_trip_links(): void
+    {
+        $date = now()->addDay()->toDateString();
+
+        $this->get("/katalog?q=bandung&date={$date}")
+            ->assertOk()
+            ->assertSee('Berangkat '.now()->addDay()->locale('id')->translatedFormat('l, j F Y'))
+            ->assertSee(route('catalog.show', ['id' => 1, 'date' => $date]), false)
+            ->assertSee('<input type="hidden" name="q" value="bandung">', false);
     }
 
     public function test_it_should_filter_by_origin_and_destination_case_insensitively(): void
@@ -67,9 +141,9 @@ class CatalogPageTest extends TestCase
     }
 
     #[DataProvider('invalidDates')]
-    public function test_it_should_fall_back_to_tomorrow_when_date_is_invalid(string $date): void
+    public function test_it_should_drop_date_when_it_is_invalid(string $date): void
     {
-        $this->get("/katalog?{$date}")->assertOk()->assertViewHas('query', fn (array $query) => $query['date'] === $this->tomorrow());
+        $this->get("/katalog?{$date}")->assertOk()->assertViewHas('query', fn (array $query) => $query['date'] === null);
     }
 
     /** @return array<string, array{0: string}> */

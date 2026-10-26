@@ -38,6 +38,14 @@ class LegacyRedirectTest extends TestCase
         ]);
     }
 
+    public function test_it_should_keep_keyword_when_redirecting_search(): void
+    {
+        $response = $this->get('/search?q=bromo&route=bromo');
+
+        $response->assertStatus(301);
+        $this->assertRedirectQuery($response->headers->get('Location'), '/katalog', ['q' => 'bromo']);
+    }
+
     public function test_it_should_drop_array_and_empty_values_when_redirecting_search(): void
     {
         $response = $this->get('/search?from[]=Jakarta&to=&date[x]=2026-12-01');

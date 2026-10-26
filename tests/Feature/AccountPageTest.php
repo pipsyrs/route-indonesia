@@ -17,6 +17,7 @@ class AccountPageTest extends TestCase
             'daftar' => ['/daftar', 'pages.account.register'],
             'dashboard' => ['/akun', 'pages.account.dashboard'],
             'pesanan' => ['/akun/pesanan', 'pages.account.orders'],
+            'alamat' => ['/akun/alamat', 'pages.account.addresses'],
             'profil' => ['/akun/profil', 'pages.account.profile'],
         ];
     }
@@ -91,6 +92,17 @@ class AccountPageTest extends TestCase
             ->assertSee('value="'.e($user['email']).'"', false)
             ->assertSee('data-form="profile"', false)
             ->assertSee('data-form="password"', false);
+    }
+
+    public function test_it_should_render_address_book_shell_with_active_sidebar_link(): void
+    {
+        $this->get('/akun/alamat')
+            ->assertOk()
+            ->assertSee('data-module="account-addresses"', false)
+            ->assertSee('data-modal-open="address-modal"', false)
+            ->assertSee('<dialog id="address-modal"', false)
+            ->assertSee('href="'.route('account.addresses').'"', false)
+            ->assertSee('aria-current="page"', false);
     }
 
     public function test_it_should_offer_logout_that_redirects_home(): void

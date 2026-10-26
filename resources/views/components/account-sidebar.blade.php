@@ -3,6 +3,7 @@
     $links = [
         ['label' => 'Dashboard', 'icon' => 'layout-dashboard', 'route' => 'account.dashboard'],
         ['label' => 'Pesanan', 'icon' => 'ticket', 'route' => 'account.orders'],
+        ['label' => 'Alamat', 'icon' => 'map-pin', 'route' => 'account.addresses'],
         ['label' => 'Profil', 'icon' => 'user', 'route' => 'account.profile'],
     ];
 @endphp

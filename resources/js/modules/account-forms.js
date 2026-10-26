@@ -44,6 +44,7 @@ export function initAccountForms(root) {
     root.querySelectorAll('[data-action="logout"]').forEach((button) => {
         button.addEventListener('click', () => {
             removeLocal(SESSION_KEY);
+            removeLocal('ri_addresses');
             location.assign(button.dataset.redirect);
         });
     });

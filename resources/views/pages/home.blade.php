@@ -9,7 +9,7 @@
     <section class="container-page relative z-10 -mt-10 sm:-mt-14" aria-labelledby="cari-title">
         <div class="card p-4 shadow-xl shadow-brand-900/5 sm:p-6">
             <h2 id="cari-title" class="sr-only">{{ __('Search travel schedules') }}</h2>
-            <x-search-form :cities="$cities" :query="['date' => $defaultDate]" />
+            <x-search-form />
         </div>
     </section>
 
@@ -21,20 +21,12 @@
         <ul class="mt-8 grid gap-x-10 md:grid-cols-2">
             @foreach ($popularRoutes as $route)
                 <li class="border-b border-line">
-                    <a href="{{ route('catalog.index', ['from' => $route['from'], 'to' => $route['to'], 'date' => $defaultDate]) }}"
+                    <a href="{{ route('catalog.index', ['route' => $route['slug'], 'date' => $defaultDate]) }}"
                        class="group flex items-center gap-4 py-5">
                         <span class="grid size-11 shrink-0 place-items-center rounded-md bg-brand-soft text-brand-ink">
                             <x-icon name="bus" class="size-5" />
                         </span>
-                        <span class="min-w-0 flex-1">
-                            <span class="flex flex-wrap items-center gap-x-2 font-semibold text-ink">
-                                {{ $route['from'] }}
-                                <x-icon name="arrow-right" class="size-4 text-ink-subtle" />
-                                <span class="sr-only">{{ __('to') }}</span>
-                                {{ $route['to'] }}
-                            </span>
-                            <span class="mt-0.5 block text-sm text-ink-subtle">{{ $route['duration'] }}, {{ __(':count trips per day', ['count' => $route['trips']]) }}</span>
-                        </span>
+                        <span class="min-w-0 flex-1 font-semibold text-ink">{{ $route['name'] }}</span>
                         <span class="text-right">
                             <span class="block text-xs text-ink-subtle">{{ __('from') }}</span>
                             <x-price :amount="$route['price']" class="font-bold text-ink" />

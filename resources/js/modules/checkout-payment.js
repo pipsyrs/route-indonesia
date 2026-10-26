@@ -57,6 +57,8 @@ export function initCheckoutPayment(root) {
             return;
         }
         clearInterval(timer);
+        // Cegah event ganda sebelum redirect selesai.
+        payment = { ...payment, status: AWAITING_CONFIRMATION };
         writeLocal(LAST_ORDER_KEY, {
             bookingCode: payment.bookingCode,
             items: getCart().items,

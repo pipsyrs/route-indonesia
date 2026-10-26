@@ -76,4 +76,25 @@
             </li>
         </template>
     </div>
+
+    {{-- Khusus tamu: dibuka order-success.js sekali per pesanan --}}
+    <x-modal id="success-guest-modal" title="Pesanan berhasil" wire:ignore>
+        <div class="flex items-start gap-3">
+            <span class="grid size-10 shrink-0 place-items-center rounded-full bg-ok-soft text-ok-ink">
+                <x-icon name="circle-check" class="size-6" />
+            </span>
+            <div class="text-sm">
+                <p class="font-semibold text-ink">Pesananmu sudah kami terima.</p>
+                <p class="mt-1 text-ink-muted">Untuk melacak data pemesanan, buat akun terlebih dahulu.</p>
+            </div>
+        </div>
+
+        <x-slot:footer>
+            <button type="button" class="btn-outline" data-modal-close>Nanti saja</button>
+            <a href="{{ route('register') }}" class="btn-primary" data-guest-register>
+                <x-icon name="user" class="size-4" />
+                Buat akun
+            </a>
+        </x-slot:footer>
+    </x-modal>
 </div>

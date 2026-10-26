@@ -21,17 +21,18 @@
             @php $status = $statusLabels[$order['status']] ?? ['label' => $order['status'], 'class' => 'bg-surface-muted text-ink-muted']; @endphp
             <li class="grid gap-3 p-4 sm:grid-cols-[1fr_auto] sm:items-center sm:p-5">
                 <div class="min-w-0">
-                    <div class="flex flex-wrap items-center gap-2">
-                        <p class="font-semibold text-ink">{{ $order['origin'] }} &rarr; {{ $order['destination'] }}</p>
-                        <span class="chip {{ $status['class'] }}">{{ $status['label'] }}</span>
-                    </div>
+                    <p class="font-semibold text-ink">{{ $order['origin'] }} &rarr; {{ $order['destination'] }}</p>
                     <p class="mt-1 text-sm text-ink-muted">
                         {{ \Illuminate\Support\Carbon::parse($order['date'])->translatedFormat('j M Y') }}, {{ $order['depart'] }}
                         &middot; {{ $order['operator'] }} &middot; {{ $order['qty'] }} tiket
                     </p>
                     <p class="mt-0.5 font-mono text-xs text-ink-subtle">{{ $order['code'] }} &middot; {{ $order['method'] }}</p>
                 </div>
-                <x-price :amount="$order['total']" class="font-bold text-ink sm:text-right" />
+                {{-- Mobile: chip & harga sebaris; sm+: bertumpuk rata kanan --}}
+                <div class="flex items-center justify-between gap-3 border-t border-dashed border-line pt-3 sm:flex-col sm:items-end sm:gap-2 sm:border-0 sm:pt-0 sm:text-right">
+                    <span class="chip {{ $status['class'] }}">{{ $status['label'] }}</span>
+                    <x-price :amount="$order['total']" class="font-bold text-ink tabular-nums" />
+                </div>
             </li>
         @endforeach
     </ul>

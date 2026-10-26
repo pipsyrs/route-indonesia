@@ -189,6 +189,24 @@ class PaymentProofUploadTest extends TestCase
             ->assertNotDispatched('payment-proof-submitted');
     }
 
+    public function test_it_should_render_guest_register_modal_on_success_page_outside_morphing(): void
+    {
+        $this->get('/pembayaran/selesai')
+            ->assertOk()
+            ->assertSee('id="success-guest-modal"', false)
+            ->assertSee('Untuk melacak data pemesanan, buat akun terlebih dahulu.')
+            ->assertSee('href="'.route('register').'"', false)
+            ->assertSee('Buat akun')
+            ->assertSee('Nanti saja');
+
+        $html = $this->get('/pembayaran/selesai')->getContent();
+        $this->assertMatchesRegularExpression('/<dialog id="success-guest-modal"[^>]*wire:ignore/', $html);
+
+        $this->get('/pembayaran')
+            ->assertOk()
+            ->assertDontSee('guest-modal', false);
+    }
+
     public function test_it_should_store_temporary_upload_on_private_disk(): void
     {
         $this->assertSame('local', config('livewire.temporary_file_upload.disk'));

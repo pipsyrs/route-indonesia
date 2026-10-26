@@ -9,6 +9,7 @@ use App\Models\Promo;
 use App\Models\Schedule;
 use App\Models\Testimonial;
 use App\Models\TravelRoute;
+use App\Support\DummyShop;
 use App\Support\TripPresenter;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -58,7 +59,6 @@ class PageController extends Controller
     public function home(): View
     {
         return view('pages.home', [
-            'cities' => $this->cities(),
             'popularRoutes' => $this->popularRoutes(),
             'promos' => $this->promos(),
             'testimonials' => $this->testimonials(),
@@ -510,19 +510,15 @@ class PageController extends Controller
             ->all();
     }
 
+    /** Preview: rute bernama dari DummyShop, harga = sub-rute termurah. */
     private function popularRoutes(): array
     {
-        $tomorrow = $this->tomorrow();
-
-        return TravelRoute::popular()
-            ->with(['origin:id,name', 'destination:id,name'])
-            ->withCount(['schedules as trips' => fn ($query) => $query->bookable()->onDate($tomorrow)])
-            ->orderBy('id')
-            ->get()
-            ->filter(fn (TravelRoute $route) => $route->origin !== null && $route->destination !== null)
-            ->map(fn (TravelRoute $route) => TripPresenter::presentPopularRoute($route, (int) $route->trips))
-            ->values()
-            ->all();
+        return array_map(fn (array $route) => [
+            'slug' => $route['slug'],
+            'name' => $route['name'],
+            'price' => DummyShop::routeMinPrice($route),
+            'trips' => count($route['trip_ids']),
+        ], DummyShop::routes());
     }
 
     /**

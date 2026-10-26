@@ -1,6 +1,7 @@
 import './bootstrap';
 // Alpine is bundled by Livewire; register Alpine.data() here before Livewire.start().
 import { Livewire, Alpine } from '../../vendor/livewire/livewire/dist/livewire.esm';
+import { initAccountAddresses } from './modules/account-addresses';
 import { initAccountForms } from './modules/account-forms';
 import { initAccountNav } from './modules/account-nav';
 import { initAddToCart } from './modules/add-to-cart';
@@ -44,6 +45,7 @@ const MODULES = {
     'checkout-payment': initCheckoutPayment,
     'order-success': initOrderSuccess,
     'account-forms': initAccountForms,
+    'account-addresses': initAccountAddresses,
     'product-buy': initProductBuy,
     'product-viewer': initProductViewer,
 };

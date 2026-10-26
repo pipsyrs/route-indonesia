@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Models\Testimonial;
-use App\Models\TravelRoute;
 use Tests\Feature\Concerns\SeededDatabase;
 use Tests\TestCase;
 
@@ -11,17 +10,17 @@ class HomePageTest extends TestCase
 {
     use SeededDatabase;
 
-    public function test_it_should_render_cities_routes_and_testimonials_from_database_when_visiting_home(): void
+    public function test_it_should_render_routes_and_testimonials_when_visiting_home(): void
     {
         $response = $this->get('/');
 
         $response->assertOk()
-            ->assertViewHas('cities', fn (array $cities) => count($cities) === 12 && $cities[0] === 'Jakarta')
-            ->assertViewHas('popularRoutes', fn (array $routes) => count($routes) === 6)
+            ->assertViewMissing('cities')
+            ->assertViewHas('popularRoutes', fn (array $routes) => count($routes) === 4)
             ->assertViewHas('testimonials', fn (array $testimonials) => count($testimonials) === 9)
             ->assertViewHas('defaultDate', $this->tomorrow())
             ->assertSee('Rina Kartika')
-            ->assertSee('Tasikmalaya');
+            ->assertSee('Papandayan');
     }
 
     public function test_it_should_render_hero_slider_and_search_form_without_promo_section(): void
@@ -48,18 +47,25 @@ class HomePageTest extends TestCase
         $this->get('/cek-pesanan')->assertOk()->assertViewIs('pages.cek-pesanan');
     }
 
-    public function test_it_should_count_tomorrows_schedules_per_popular_route_when_visiting_home(): void
+    public function test_it_should_list_dummy_popular_routes_with_min_price_when_visiting_home(): void
     {
-        $this->withSession(['locale' => 'id'])->get('/')->assertViewHas('popularRoutes', function (array $routes) {
-            $byPair = collect($routes)->keyBy(fn ($route) => "{$route['from']}-{$route['to']}");
+        $response = $this->get('/');
 
-            return $byPair['Jakarta-Bandung']['trips'] === 8
-                && $byPair['Jakarta-Bandung']['price'] === 110000
-                && $byPair['Jakarta-Bandung']['duration'] === '± 3 jam'
-                && $byPair['Yogyakarta-Semarang']['duration'] === '± 3,5 jam'
-                && $byPair['Solo-Yogyakarta']['duration'] === '± 1,5 jam'
-                && $byPair['Surabaya-Malang']['trips'] === 3;
+        $response->assertViewHas('popularRoutes', function (array $routes) {
+            $bySlug = collect($routes)->keyBy('slug');
+
+            return collect($routes)->every(fn ($route) => array_keys($route) === ['slug', 'name', 'price', 'trips'])
+                && $bySlug->keys()->all() === ['papandayan', 'bromo', 'prambanan', 'karimunjawa']
+                && $bySlug['papandayan']['price'] === 110000
+                && $bySlug['papandayan']['trips'] === 4
+                && $bySlug['bromo']['price'] === 90000
+                && $bySlug['prambanan']['price'] === 285000
+                && $bySlug['karimunjawa']['price'] === 120000;
         });
+
+        foreach (['papandayan', 'bromo', 'prambanan', 'karimunjawa'] as $slug) {
+            $response->assertSee('/katalog?route='.$slug.'&amp;date='.$this->tomorrow(), false);
+        }
     }
 
     public function test_it_should_hide_unpublished_testimonial_when_visiting_home(): void
@@ -70,18 +76,5 @@ class HomePageTest extends TestCase
             ->assertOk()
             ->assertViewHas('testimonials', fn (array $testimonials) => count($testimonials) === 8)
             ->assertDontSee('Rina Kartika');
-    }
-
-    public function test_it_should_skip_route_when_its_city_is_soft_deleted(): void
-    {
-        $route = $this->routeBetween('Solo', 'Yogyakarta');
-        $route->origin()->first()->delete();
-
-        $this->get('/')
-            ->assertOk()
-            ->assertViewHas('popularRoutes', fn (array $routes) => count($routes) === 5)
-            ->assertViewHas('cities', fn (array $cities) => ! in_array('Solo', $cities, true));
-
-        $this->assertNotNull(TravelRoute::find($route->id));
     }
 }

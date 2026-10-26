@@ -27,7 +27,7 @@
                 </summary>
 
                 <div class="mt-5 border-t border-line pt-5">
-                    <x-search-form :cities="$cities" :query="$query" id-prefix="ubah" />
+                    <x-search-form :query="$query" id-prefix="ubah" />
                 </div>
             </details>
         </div>

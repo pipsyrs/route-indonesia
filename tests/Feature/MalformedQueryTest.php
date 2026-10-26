@@ -49,19 +49,19 @@ class MalformedQueryTest extends TestCase
         }
     }
 
-    public function test_it_should_fall_back_to_all_cities_and_tomorrow_when_catalog_input_is_invalid(): void
+    public function test_it_should_fall_back_to_all_cities_and_no_date_when_catalog_input_is_invalid(): void
     {
         $this->get('/katalog?from[]=Surabaya&to=Atlantis&date=2026-02-31')
             ->assertOk()
             ->assertViewHas('query', fn ($query) => $query['from'] === null
                 && $query['to'] === null
-                && $query['date'] === $this->tomorrow());
+                && $query['date'] === null);
     }
 
-    public function test_it_should_raise_past_date_to_tomorrow_when_browsing_catalog(): void
+    public function test_it_should_drop_past_date_when_browsing_catalog(): void
     {
         $this->get('/katalog?date=2000-01-01')
             ->assertOk()
-            ->assertViewHas('query', fn ($query) => $query['date'] === $this->tomorrow());
+            ->assertViewHas('query', fn ($query) => $query['date'] === null);
     }
 }

@@ -13,36 +13,45 @@ const SORTERS = {
 export function initSearchFilter(root) {
     const form = root.querySelector('[data-filter-form]');
     const list = root.querySelector('[data-filter-list]');
-    if (!form || !list) {
+    if (!list) {
         return;
     }
 
     const cards = [...list.querySelectorAll('[data-trip-card]')];
     const sortSelect = root.querySelector('[data-filter-sort]');
-    const priceInput = form.querySelector('[data-filter-price]');
-    const priceLabel = form.querySelector('[data-filter-price-label]');
+    const priceInput = form?.querySelector('[data-filter-price]');
+    const priceLabel = form?.querySelector('[data-filter-price-label]');
     const count = root.querySelector('[data-filter-count]');
     const empty = root.querySelector('[data-filter-empty]');
 
     const render = () => {
-        const criteria = readCriteria(form, priceInput);
-        priceLabel.textContent = formatRupiah(criteria.maxPrice);
+        // Tanpa form filter (halaman katalog) hanya urutkan.
+        const criteria = form ? readCriteria(form, priceInput) : null;
+        if (criteria) {
+            priceLabel.textContent = formatRupiah(criteria.maxPrice);
+        }
 
         const sorted = [...cards].sort(SORTERS[sortSelect.value] ?? SORTERS.depart);
         let visibleCount = 0;
         for (const card of sorted) {
-            const isVisible = matchesCriteria(card, criteria);
+            const isVisible = !criteria || matchesCriteria(card, criteria);
             card.hidden = !isVisible;
             visibleCount += isVisible ? 1 : 0;
             list.append(card);
         }
 
         count.textContent = String(visibleCount);
-        empty.hidden = visibleCount > 0;
+        if (empty) {
+            empty.hidden = visibleCount > 0;
+        }
     };
 
-    form.addEventListener('input', render);
     sortSelect.addEventListener('change', render);
+    if (!form) {
+        return;
+    }
+
+    form.addEventListener('input', render);
     // Event reset terjadi sebelum nilai form dikembalikan; render setelahnya.
     form.addEventListener('reset', () => setTimeout(render));
     root.querySelectorAll('[data-filter-reset]').forEach((button) => {

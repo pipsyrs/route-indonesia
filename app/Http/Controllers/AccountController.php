@@ -37,6 +37,13 @@ class AccountController extends Controller
         ]);
     }
 
+    public function addresses(): View
+    {
+        return view('pages.account.addresses', [
+            'user' => DummyShop::user(),
+        ]);
+    }
+
     public function profile(): View
     {
         return view('pages.account.profile', [

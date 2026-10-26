@@ -41,6 +41,7 @@ Route::controller(AccountController::class)->group(function () {
     Route::get('/daftar', 'register')->name('register');
     Route::get('/akun', 'dashboard')->name('account.dashboard');
     Route::get('/akun/pesanan', 'orders')->name('account.orders');
+    Route::get('/akun/alamat', 'addresses')->name('account.addresses');
     Route::get('/akun/profil', 'profile')->name('account.profile');
 });
 
@@ -48,7 +49,7 @@ Route::controller(AccountController::class)->group(function () {
 // Route::redirect membuang query string, jadi /search pakai closure dengan whitelist key.
 Route::get('/search', function (Request $request) {
     $query = array_filter(
-        $request->only(['from', 'to', 'date']),
+        $request->only(['q', 'from', 'to', 'date']),
         fn ($value) => is_string($value) && $value !== '',
     );
 

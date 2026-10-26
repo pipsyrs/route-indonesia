@@ -30,6 +30,7 @@ class PublicRouteSmokeTest extends TestCase
             'daftar' => ['/daftar'],
             'akun' => ['/akun'],
             'akun pesanan' => ['/akun/pesanan'],
+            'akun alamat' => ['/akun/alamat'],
             'akun profil' => ['/akun/profil'],
         ];
     }

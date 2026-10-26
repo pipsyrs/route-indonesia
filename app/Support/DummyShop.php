@@ -64,6 +64,47 @@ class DummyShop
         return null;
     }
 
+    /** @return list<array{slug: string, name: string, trip_ids: list<int>}> rute bernama, tiap trip = sub-rute */
+    public static function routes(): array
+    {
+        return [
+            ['slug' => 'papandayan', 'name' => 'Papandayan', 'trip_ids' => [1, 2, 3, 4]],
+            ['slug' => 'bromo', 'name' => 'Bromo', 'trip_ids' => [8, 9]],
+            ['slug' => 'prambanan', 'name' => 'Prambanan', 'trip_ids' => [5, 10]],
+            ['slug' => 'karimunjawa', 'name' => 'Karimunjawa', 'trip_ids' => [6, 7]],
+        ];
+    }
+
+    /** @return array{slug: string, name: string, trip_ids: list<int>}|null */
+    public static function findRoute(string $slug): ?array
+    {
+        foreach (self::routes() as $route) {
+            if ($route['slug'] === $slug) {
+                return $route;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @param  array{trip_ids: list<int>}  $route
+     * @return list<array<string, mixed>>
+     */
+    public static function routeTrips(array $route): array
+    {
+        return array_values(array_filter(
+            self::trips(),
+            fn (array $trip) => in_array($trip['id'], $route['trip_ids'], true),
+        ));
+    }
+
+    /** @param  array{trip_ids: list<int>}  $route  harga sub-rute termurah */
+    public static function routeMinPrice(array $route): int
+    {
+        return min(array_column(self::routeTrips($route), 'price'));
+    }
+
     /** @return list<array<string, mixed>> */
     public static function paymentMethods(): array
     {
