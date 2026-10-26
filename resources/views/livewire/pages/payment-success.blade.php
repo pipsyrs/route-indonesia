@@ -72,7 +72,7 @@
                 <p class="font-semibold text-ink" data-field="route"></p>
                 <p class="text-sm text-ink-muted" data-field="schedule"></p>
                 <p class="text-sm text-ink-muted" data-field="pickup"></p>
-                <p class="mt-2 text-sm text-ink"><span class="text-ink-subtle">Penumpang:</span> <span data-field="names"></span></p>
+                <p class="mt-2 text-sm text-ink" data-seat-line><span class="text-ink-subtle">Kursi:</span> <span data-field="seats"></span></p>
             </li>
         </template>
     </div>

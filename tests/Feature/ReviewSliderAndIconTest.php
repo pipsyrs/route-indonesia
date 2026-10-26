@@ -91,7 +91,8 @@ class ReviewSliderAndIconTest extends TestCase
             $html = $this->get($uri)->assertOk()->getContent();
 
             $this->assertStringNotContainsString('focusable="false"></svg>', $html, "Ikon kosong di {$uri}");
-            $this->assertSame(0, preg_match('/<svg[^>]*stroke-width="(?!1\.5")/', $html), "stroke-width bukan 1.5 di {$uri}");
+            $this->assertStringContainsString('viewBox="0 0 256 256" fill="currentColor"', $html, "Ikon Phosphor tidak ada di {$uri}");
+            $this->assertSame(0, preg_match('/<svg[^>]*stroke-width=/', $html), "Ikon masih ber-stroke di {$uri}");
         }
     }
 }

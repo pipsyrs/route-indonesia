@@ -44,4 +44,10 @@ return [
 
     'community_url' => \App\Support\SafeUrl::https(env('COMMUNITY_URL')),
 
+    // Nomor mentah; dinormalisasi PhoneNumber::whatsapp() saat dipakai.
+    'whatsapp' => [
+        'number' => env('WHATSAPP_NUMBER'),
+        'message' => env('WHATSAPP_MESSAGE') ?: 'Halo Route Indonesia, saya ingin bertanya tentang trip.',
+    ],
+
 ];

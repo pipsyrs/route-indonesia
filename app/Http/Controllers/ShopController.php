@@ -62,6 +62,7 @@ class ShopController extends Controller
             'dateLabel' => $date->translatedFormat('l, j F Y'),
             'maxQty' => min($trip['seats_left'], DummyShop::MAX_QTY),
             'facilityLabels' => DummyShop::facilityLabels(),
+            'seatMap' => DummyShop::seatMap($trip, $date->toDateString()),
         ]);
     }
 

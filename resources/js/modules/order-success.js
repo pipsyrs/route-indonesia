@@ -50,14 +50,14 @@ export function initOrderSuccess(root) {
         const row = template.content.firstElementChild.cloneNode(true);
         if (isProductItem(item)) {
             set(row, 'route', `${item.name} · ${item.qty} pcs`);
-            ['schedule', 'pickup', 'names'].forEach((field) => set(row, field, ''));
+            ['schedule', 'pickup', 'seats'].forEach((field) => set(row, field, ''));
+            row.querySelector('[data-seat-line]').hidden = true;
             return row;
         }
-        const names = order.passengers?.find((entry) => entry.itemKey === item.key)?.names ?? [];
         set(row, 'route', `${item.origin} → ${item.destination} · ${item.qty} tiket`);
         set(row, 'schedule', `${item.dateLabel}, ${item.depart} - ${item.arrive} · ${item.operator}`);
         set(row, 'pickup', item.pickup ? `Jemput: ${item.pickup.name} (${item.pickup.time})` : '');
-        set(row, 'names', names.join(', ') || `${item.qty} orang`);
+        set(row, 'seats', item.seats.join(', '));
         return row;
     }));
 
@@ -66,8 +66,8 @@ export function initOrderSuccess(root) {
     promptGuest(order.bookingCode);
 
     // Data pribadi cukup tampil sekali; simpan ringkasan saja untuk refresh.
-    if (order.contact || order.passengers) {
-        const { contact, passengers, ...summary } = order;
+    if (order.contact) {
+        const { contact, ...summary } = order;
         writeLocal(LAST_ORDER_KEY, summary);
     }
 }

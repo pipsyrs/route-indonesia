@@ -1,12 +1,9 @@
 import { showToast } from './toast';
-import { readLocal, writeLocal } from './utils/storage';
+import { ADDRESS_LABELS, formatRegion, readAddresses, saveAddress, writeAddresses } from './utils/address-book';
 import { bindLiveValidation, normalizePhone, validateForm } from './utils/validate';
 
 /** Buku alamat mode demo: hanya di localStorage perangkat ini, dirender via textContent (aman XSS). */
-const STORAGE_KEY = 'ri_addresses';
-const LABELS = ['Rumah', 'Kantor', 'Lainnya'];
-const LIMITS = { name: 60, phone: 16, address: 200, city: 60, postal: 5 };
-const POSTAL_PATTERN = /^[0-9]{5}$/;
+const POSTAL_LENGTH = 5;
 
 export function initAccountAddresses(root) {
     const list = root.querySelector('[data-address-list]');
@@ -50,34 +47,29 @@ export function initAccountAddresses(root) {
 
     bindLiveValidation(form);
     postal.addEventListener('input', () => {
-        postal.value = postal.value.replace(/[^0-9]/g, '').slice(0, LIMITS.postal);
-        if (postal.getAttribute('aria-invalid') === 'true') {
-            validatePostal(postal);
-        }
+        postal.value = postal.value.replace(/[^0-9]/g, '').slice(0, POSTAL_LENGTH);
     });
-    postal.addEventListener('blur', () => validatePostal(postal));
 
     form.addEventListener('submit', (event) => {
         event.preventDefault();
-        const formValid = validateForm(form);
-        const postalValid = validatePostal(postal);
-        if (!formValid || !postalValid) {
-            if (formValid) {
-                postal.focus();
-            }
+        if (!validateForm(form)) {
             return;
         }
-        addresses.push({
-            id: `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`,
-            label: form.querySelector('[name="address-label"]:checked')?.value ?? LABELS[0],
+        const result = saveAddress({
+            label: form.querySelector('[name="address-label"]:checked')?.value ?? ADDRESS_LABELS[0],
             name: field(form, 'name'),
             phone: normalizePhone(field(form, 'phone')),
             address: field(form, 'address'),
+            province: field(form, 'province'),
             city: field(form, 'city'),
+            district: field(form, 'district'),
             postal: field(form, 'postal'),
-            // Alamat pertama otomatis jadi utama.
-            primary: addresses.length === 0,
         });
+        if (result === 'duplicate') {
+            showToast('Alamat ini sudah ada di buku alamat');
+            return;
+        }
+        addresses = readAddresses() ?? [];
         dialog.close();
         commit('Alamat ditambahkan');
     });
@@ -89,7 +81,7 @@ export function initAccountAddresses(root) {
     }
 
     function save() {
-        writeLocal(STORAGE_KEY, addresses);
+        writeAddresses(addresses);
     }
 
     function render() {
@@ -113,7 +105,7 @@ function renderCard(template, item) {
     slot('name').textContent = item.name;
     slot('phone').textContent = item.phone;
     slot('address').textContent = item.address;
-    slot('region').textContent = `${item.city} ${item.postal}`;
+    slot('region').textContent = formatRegion(item);
 
     card.querySelector('[data-action="set-primary"]').hidden = item.primary;
     card.querySelector('[data-action="delete"]').setAttribute('aria-label', `Hapus alamat ${item.label}, ${item.name}`);
@@ -121,51 +113,13 @@ function renderCard(template, item) {
     return card;
 }
 
-function validatePostal(input) {
-    const valid = POSTAL_PATTERN.test(input.value.trim());
-    const error = document.getElementById(input.getAttribute('aria-describedby'));
-    input.setAttribute('aria-invalid', String(!valid));
-    error.hidden = valid;
-    error.textContent = valid ? '' : 'Kode pos harus 5 digit angka.';
-
-    return valid;
-}
-
 function field(form, name) {
     return form.querySelector(`[data-field="${name}"]`).value.trim();
 }
 
-/** null = belum pernah disimpan (perlu seed); data rusak dibuang, bukan dipercaya. */
-function readAddresses() {
-    const stored = readLocal(STORAGE_KEY);
-    if (stored === null) {
-        return null;
-    }
-    if (!Array.isArray(stored)) {
-        return [];
-    }
-
-    const valid = stored.filter((item) => item !== null && typeof item === 'object'
-        && typeof item.id === 'string' && LABELS.includes(item.label)
-        && Object.keys(LIMITS).every((key) => typeof item[key] === 'string' && item[key] !== '' && item[key].length <= LIMITS[key]));
-
-    let hasPrimary = false;
-    const addresses = valid.map((item) => {
-        const primary = item.primary === true && !hasPrimary;
-        hasPrimary ||= primary;
-
-        return { id: item.id, label: item.label, name: item.name, phone: item.phone, address: item.address, city: item.city, postal: item.postal, primary };
-    });
-    if (!hasPrimary && addresses.length > 0) {
-        addresses[0].primary = true;
-    }
-
-    return addresses;
-}
-
 function seedAddresses({ seedName = 'Pengguna', seedPhone = '081234567890' }) {
     return [
-        { id: 'seed-home', label: 'Rumah', name: seedName, phone: seedPhone, address: 'Jl. Kaliurang Km 5 No. 12, Caturtunggal, Depok', city: 'Sleman', postal: '55281', primary: true },
-        { id: 'seed-office', label: 'Kantor', name: seedName, phone: seedPhone, address: 'Jl. Malioboro No. 56, Suryatmajan, Danurejan', city: 'Yogyakarta', postal: '55213', primary: false },
+        { id: 'seed-home', label: 'Rumah', name: seedName, phone: seedPhone, address: 'Jl. Kaliurang Km 5 No. 12, Caturtunggal, Depok', province: 'DI Yogyakarta', city: 'Sleman', district: 'Depok', postal: '55281', primary: true },
+        { id: 'seed-office', label: 'Kantor', name: seedName, phone: seedPhone, address: 'Jl. Malioboro No. 56, Suryatmajan, Danurejan', province: 'DI Yogyakarta', city: 'Yogyakarta', district: 'Danurejan', postal: '55213', primary: false },
     ];
 }

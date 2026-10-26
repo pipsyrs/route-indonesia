@@ -21,7 +21,9 @@
 
         <x-footer />
 
-        {{-- z-index: navbar 30, bilah bawah 20, panel filter 40, toast 50 --}}
+        <x-whatsapp-float />
+
+        {{-- z-index: navbar 30, WhatsApp 30, bilah bawah 20, panel filter 40, toast 50 --}}
         <div data-toast-region class="pointer-events-none fixed inset-x-0 bottom-24 z-50 flex flex-col items-center gap-2 px-4 lg:bottom-6" role="status" aria-live="polite"></div>
 
         @livewireScriptConfig

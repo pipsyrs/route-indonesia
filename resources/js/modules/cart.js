@@ -1,3 +1,4 @@
+import { isSeatCode } from './utils/seat-map';
 import { readLocal, removeLocal, writeLocal } from './utils/storage';
 
 export const CART_KEY = 'ri_cart';
@@ -6,7 +7,7 @@ export const PAYMENT_KEY = 'ri_payment';
 export const LAST_ORDER_KEY = 'ri_last_order';
 export const SESSION_KEY = 'ri_session';
 
-const CART_VERSION = 1;
+const CART_VERSION = 2;
 export const PRODUCT_MAX_QTY = 10;
 
 /** Keranjang rusak / versi lain dianggap kosong. */
@@ -58,9 +59,9 @@ export function isProductItem(item) {
     return item.type === 'product';
 }
 
-/** Sidik isi keranjang (key + qty) untuk mendeteksi perubahan. */
+/** Sidik isi keranjang (key + qty + kursi) untuk mendeteksi perubahan. */
 export function cartSignature(cart = getCart()) {
-    return cart.items.map((item) => `${item.key}:${item.qty}`).sort().join(',');
+    return cart.items.map((item) => `${item.key}:${item.qty}:${(item.seats ?? []).join('.')}`).sort().join(',');
 }
 
 export function updateQty(key, qty) {
@@ -68,8 +69,59 @@ export function updateQty(key, qty) {
     const item = cart.items.find((entry) => entry.key === key);
     if (item) {
         item.qty = clampQty(qty, item.maxQty);
+        if (!isProductItem(item)) {
+            item.seats = item.seats.slice(0, item.qty);
+        }
         saveCart(cart);
     }
+}
+
+/** Trip dari detail: kursi & qty diganti, bukan dijumlah. @returns {'added'|'updated'|null} null = tidak valid */
+export function upsertTrip(item) {
+    const seats = Array.isArray(item.seats) ? [...item.seats].sort(compareSeats) : [];
+    const next = { ...item, seats, qty: seats.length };
+    if (isProductItem(next) || !isValidItem(next)) {
+        return null;
+    }
+    const cart = getCart();
+    const index = cart.items.findIndex((entry) => entry.key === next.key);
+    if (index >= 0) {
+        cart.items[index] = { ...next, addedAt: cart.items[index].addedAt };
+    } else {
+        cart.items.push(next);
+    }
+    saveCart(cart);
+
+    return index >= 0 ? 'updated' : 'added';
+}
+
+/** Kursi & qty diset bersama (qty = jumlah kursi). @returns {boolean} false bila tidak valid */
+export function setTripSeats(key, seats) {
+    const cart = getCart();
+    const item = cart.items.find((entry) => entry.key === key);
+    const sorted = Array.isArray(seats) ? [...seats].sort(compareSeats) : [];
+    if (!item || isProductItem(item) || sorted.length < 1 || sorted.length > item.maxQty
+        || !areValidSeats({ ...item, qty: sorted.length }, sorted)) {
+        return false;
+    }
+    item.qty = sorted.length;
+    item.seats = sorted;
+    saveCart(cart);
+
+    return true;
+}
+
+/** Kode kursi di denah (tanpa sopir & lorong). */
+export function seatCodes(layout) {
+    return layout.flat().filter(isSeatCode);
+}
+
+export function isSeatComplete(item) {
+    return isProductItem(item) || item.seats.length === item.qty;
+}
+
+export function allSeatsComplete(cart = getCart()) {
+    return cart.items.every(isSeatComplete);
 }
 
 export function removeItem(key) {
@@ -131,6 +183,27 @@ function clampQty(qty, maxQty) {
     return Math.min(Math.max(value, 1), maxQty);
 }
 
+const MAX_LAYOUT_ROWS = 15;
+const MAX_LAYOUT_COLS = 6;
+
+const compareSeats = (a, b) => Number(a) - Number(b);
+
+function isValidLayout(layout) {
+    return Array.isArray(layout) && layout.length >= 1 && layout.length <= MAX_LAYOUT_ROWS
+        && layout.every((row) => Array.isArray(row) && row.length >= 1 && row.length <= MAX_LAYOUT_COLS
+            && row.every((cell) => cell === null || typeof cell === 'string'));
+}
+
+/** Unik, <= qty, ada di denah, dan tidak terisi. */
+function areValidSeats(item, seats) {
+    const codes = seatCodes(item.seatLayout);
+
+    return Array.isArray(seats)
+        && seats.length <= item.qty
+        && new Set(seats).size === seats.length
+        && seats.every((seat) => typeof seat === 'string' && codes.includes(seat) && !item.occupied.includes(seat));
+}
+
 const TEXT_FIELDS = ['key', 'operator', 'vehicle', 'origin', 'destination', 'date', 'dateLabel', 'depart', 'arrive'];
 const PRODUCT_FIELDS = ['key', 'id', 'name'];
 
@@ -157,8 +230,15 @@ export function isValidItem(item) {
             && (item.image === null || typeof item.image === 'string')
         : TEXT_FIELDS.every((field) => typeof item[field] === 'string');
 
-    return hasFields
+    const isBaseValid = hasFields
         && Number.isFinite(item.price) && item.price > 0
         && Number.isInteger(item.maxQty) && item.maxQty >= 1
         && Number.isInteger(item.qty) && item.qty >= 1 && item.qty <= item.maxQty;
+    if (!isBaseValid || isProductItem(item)) {
+        return isBaseValid;
+    }
+
+    return isValidLayout(item.seatLayout)
+        && Array.isArray(item.occupied) && item.occupied.every((seat) => typeof seat === 'string')
+        && areValidSeats(item, item.seats);
 }

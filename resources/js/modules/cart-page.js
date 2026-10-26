@@ -1,4 +1,5 @@
-import { getCart, isProductItem, removeItem, updateQty } from './cart';
+import { allSeatsComplete, getCart, isProductItem, isSeatComplete, removeItem, updateQty } from './cart';
+import { initCartSeatModal } from './cart-seat-modal';
 import { renderCartSummary } from './cart-summary';
 import { formatRupiah } from './utils/format';
 
@@ -11,6 +12,7 @@ export function initCartPage(root) {
 
     // Baris dirender ulang tiap perubahan; kembalikan fokus ke kontrol yang sama.
     let pendingFocus = null;
+    const checkoutLink = root.querySelector('[data-checkout-link]');
 
     const render = () => {
         const cart = getCart();
@@ -20,6 +22,7 @@ export function initCartPage(root) {
 
         list.replaceChildren(...cart.items.map((item) => buildRow(template, item)));
         renderCartSummary(root, cart);
+        renderCheckoutLink(root, checkoutLink, allSeatsComplete(cart));
 
         if (pendingFocus) {
             const row = [...list.querySelectorAll('[data-cart-item]')].find((el) => el.dataset.cartItem === pendingFocus.key);
@@ -51,9 +54,44 @@ export function initCartPage(root) {
         }
     });
 
+    // Link checkout dikunci sampai semua tiket punya kursi.
+    checkoutLink?.addEventListener('click', (event) => {
+        if (checkoutLink.getAttribute('aria-disabled') === 'true') {
+            event.preventDefault();
+        }
+    });
+
+    const seatModal = root.querySelector('[data-seat-modal]');
+    if (seatModal) {
+        initCartSeatModal(seatModal, {
+            onSaved: (key) => {
+                const row = [...list.querySelectorAll('[data-cart-item]')].find((el) => el.dataset.cartItem === key);
+                row?.querySelector('[data-seat-open]')?.focus();
+            },
+        });
+    }
+
     window.addEventListener('cart:change', render);
     window.addEventListener('storage', render);
     render();
+}
+
+function renderCheckoutLink(root, link, isReady) {
+    if (!link) {
+        return;
+    }
+    link.classList.toggle('pointer-events-none', !isReady);
+    link.classList.toggle('opacity-50', !isReady);
+    if (isReady) {
+        link.removeAttribute('aria-disabled');
+        link.removeAttribute('tabindex');
+        link.removeAttribute('aria-describedby');
+    } else {
+        link.setAttribute('aria-disabled', 'true');
+        link.setAttribute('tabindex', '-1');
+        link.setAttribute('aria-describedby', 'checkout-hint');
+    }
+    root.querySelector('[data-checkout-hint]').hidden = isReady;
 }
 
 /** textContent saja agar data dari localStorage tidak pernah jadi HTML. */
@@ -69,6 +107,7 @@ function buildRow(template, item) {
         set('route', item.name);
         row.querySelector('[data-field="operator"]').hidden = true;
         row.querySelector('dl').hidden = true;
+        row.querySelector('[data-seat-block]').hidden = true;
         set('price', `${formatRupiah(item.price)} / pcs`);
     } else {
         set('route', `${item.origin} → ${item.destination}`);
@@ -77,6 +116,15 @@ function buildRow(template, item) {
         set('time', `${item.depart} - ${item.arrive}`);
         set('pickup', item.pickup ? `${item.pickup.name} (${item.pickup.time})` : '-');
         set('price', `${formatRupiah(item.price)} / orang`);
+
+        const isComplete = isSeatComplete(item);
+        row.querySelector('[data-seat-done]').hidden = !isComplete;
+        row.querySelector('[data-seat-pending]').hidden = isComplete;
+        row.querySelector('[data-qty-control]').hidden = true;
+        row.querySelector('[data-qty-label]').hidden = true;
+        set('seat-count', `${item.qty} tiket`);
+        set('seat-pending', `Kursi dipilih ${item.seats.length} dari ${item.qty}`);
+        set('seat-action', item.seats.length > 0 ? `Ubah kursi (${item.seats.join(', ')})` : 'Pilih kursi');
     }
     set('line-total', formatRupiah(item.price * item.qty));
 

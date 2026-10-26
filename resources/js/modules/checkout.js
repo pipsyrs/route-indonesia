@@ -1,8 +1,27 @@
-import { CHECKOUT_KEY, PAYMENT_KEY, cartSignature, getCart, isProductItem } from './cart';
+import { Livewire } from '../../../vendor/livewire/livewire/dist/livewire.esm';
+import { CHECKOUT_KEY, PAYMENT_KEY, SESSION_KEY, allSeatsComplete, cartSignature, getCart, isProductItem } from './cart';
 import { renderCartSummary } from './cart-summary';
 import { showToast } from './toast';
+import { formatRegion, readAddresses, saveAddress } from './utils/address-book';
 import { readLocal, removeLocal, writeLocal } from './utils/storage';
-import { bindLiveValidation, normalizePhone, validateForm } from './utils/validate';
+import { bindLiveValidation, inputError, normalizeInstagram, normalizePhone, validateForm, validateInput } from './utils/validate';
+
+// data-field checkout -> key buku alamat.
+const ADDRESS_FIELDS = { address_street: 'address', address_province: 'province', address_city: 'city', address_district: 'district', address_postal: 'postal' };
+
+const SAVED_FIELDS = {
+    contact_name: (saved) => saved.contact?.name,
+    contact_email: (saved) => saved.contact?.email,
+    contact_phone: (saved) => saved.contact?.phone,
+    address_street: (saved) => saved.address?.street,
+    address_province: (saved) => saved.address?.province,
+    address_city: (saved) => saved.address?.city,
+    address_district: (saved) => saved.address?.district,
+    address_postal: (saved) => saved.address?.postalCode,
+    referral_source: (saved) => saved.referralSource,
+    instagram: (saved) => saved.instagram,
+    referral_code: (saved) => saved.referralCode,
+};
 
 export function initCheckout(root) {
     const form = root.querySelector('[data-checkout-form]');
@@ -10,46 +29,71 @@ export function initCheckout(root) {
         return;
     }
 
+    // Keranjang kosong atau kursi belum lengkap: kembali ke keranjang.
     const cart = getCart();
-    if (cart.items.length === 0) {
+    if (cart.items.length === 0 || !allSeatsComplete(cart)) {
         location.replace(form.dataset.emptyUrl);
         return;
     }
 
     let renderedSignature = cartSignature(cart);
-    renderPassengerInputs(root, form, cart);
+    let isSubmitting = false;
+    const submit = form.querySelector('[data-checkout-submit]');
     renderCartSummary(root, cart, { withItems: true });
-    restoreSaved(form, readLocal(CHECKOUT_KEY));
-    initSameAsContact(form);
+    const saved = readLocal(CHECKOUT_KEY);
+    restoreSaved(form, saved);
+    const addressPicker = initAddressPicker(root, form, saved?.contact ? saved.address : null);
     bindLiveValidation(form);
 
-    form.addEventListener('submit', (event) => {
-        event.preventDefault();
-
-        // Keranjang berubah (mis. di tab lain): render ulang field penumpang, jangan kirim.
-        const latest = getCart();
-        if (latest.items.length === 0) {
+    // Keranjang berubah (mis. di tab lain): render ulang ringkasan, jangan kirim.
+    const isCartChanged = (latest) => {
+        if (latest.items.length === 0 || !allSeatsComplete(latest)) {
             location.replace(form.dataset.emptyUrl);
-            return;
+            return true;
         }
         if (cartSignature(latest) !== renderedSignature) {
-            const names = collectNames(form);
             renderedSignature = cartSignature(latest);
-            renderPassengerInputs(root, form, latest);
-            restorePassengerNames(form, names);
             renderCartSummary(root, latest, { withItems: true });
-            showToast('Keranjang berubah. Periksa lagi data penumpang.');
-            form.querySelector('[data-passenger-groups]').scrollIntoView({ block: 'start' });
+            showToast('Keranjang berubah. Periksa lagi pesananmu.');
+            return true;
+        }
+
+        return false;
+    };
+
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (isSubmitting || isCartChanged(getCart()) || !validateForm(form)) {
             return;
         }
 
-        if (!validateForm(form)) {
+        showSeatError(form, null);
+        isSubmitting = true;
+        submit.disabled = true;
+        const result = await checkSeats(root, getCart());
+        isSubmitting = false;
+        submit.disabled = false;
+        if (!result.valid) {
+            showSeatError(form, result.message);
+            return;
+        }
+
+        const latest = getCart();
+        if (isCartChanged(latest)) {
             return;
         }
 
         // Total dihitung ulang dari keranjang terbaru saat submit.
         const totals = renderCartSummary(root, latest, { withItems: true });
         const field = (name) => form.querySelector(`[data-field="${name}"]`).value.trim();
+        if (addressPicker.shouldSave()) {
+            saveAddress({
+                label: 'Lainnya',
+                name: field('contact_name'),
+                phone: normalizePhone(field('contact_phone')),
+                ...Object.fromEntries(Object.entries(ADDRESS_FIELDS).map(([name, key]) => [key, field(name)])),
+            });
+        }
 
         writeLocal(CHECKOUT_KEY, {
             contact: {
@@ -57,12 +101,17 @@ export function initCheckout(root) {
                 email: field('contact_email').toLowerCase(),
                 phone: normalizePhone(field('contact_phone')),
             },
-            passengers: latest.items.filter((item) => !isProductItem(item)).map((item) => ({
-                itemKey: item.key,
-                names: [...form.querySelectorAll('[data-passenger-name]')]
-                    .filter((input) => input.dataset.itemKey === item.key)
-                    .map((input) => input.value.trim()),
-            })),
+            address: {
+                street: field('address_street'),
+                province: field('address_province'),
+                city: field('address_city'),
+                district: field('address_district'),
+                postalCode: field('address_postal'),
+            },
+            referralSource: field('referral_source'),
+            instagram: normalizeInstagram(field('instagram')) || null,
+            referralCode: field('referral_code').toUpperCase() || null,
+            signature: cartSignature(latest),
             methodId: form.querySelector('[name="method"]:checked').value,
             ...totals,
             createdAt: new Date().toISOString(),
@@ -73,59 +122,156 @@ export function initCheckout(root) {
     });
 }
 
-function renderPassengerInputs(root, form, cart) {
-    const container = form.querySelector('[data-passenger-groups]');
-    const template = root.querySelector('[data-passenger-group-template]');
-    let number = 0;
+/** Pengguna masuk + buku alamat terisi: pilih alamat tersimpan atau "Pakai alamat lain". */
+function initAddressPicker(root, form, restored) {
+    // Hanya membaca; seed dibuat di halaman buku alamat.
+    const addresses = isLoggedIn() ? [...(readAddresses() ?? [])].sort((a, b) => Number(b.primary) - Number(a.primary)) : [];
+    const saveCheckbox = form.querySelector('[data-save-address]');
+    if (addresses.length === 0) {
+        return { shouldSave: () => false };
+    }
 
-    // Nama penumpang hanya untuk tiket, bukan produk toko.
-    const tickets = cart.items.filter((item) => !isProductItem(item));
-    container.closest('section').hidden = tickets.length === 0;
-    container.replaceChildren(...tickets.map((item, itemIndex) => {
-        const group = template.content.firstElementChild.cloneNode(true);
-        group.querySelector('[data-field="legend"]').textContent = `${item.origin} → ${item.destination}, ${item.dateLabel} ${item.depart}`;
-        const inputs = group.querySelector('[data-passenger-inputs]');
+    const picker = form.querySelector('[data-saved-addresses]');
+    const fields = form.querySelector('[data-address-fields]');
+    const hint = form.querySelector('[data-address-hint]');
+    const edit = form.querySelector('[data-address-edit]');
+    const saveOption = form.querySelector('[data-save-address-option]');
+    const template = root.querySelector('[data-saved-address-template]');
+    const input = (name) => form.querySelector(`[data-field="${name}"]`);
+    const inputs = Object.keys(ADDRESS_FIELDS).map(input);
 
-        for (let seat = 0; seat < item.qty; seat++) {
-            number += 1;
-            const id = `penumpang-${itemIndex}-${seat}`;
-            const wrapper = document.createElement('div');
-            const label = document.createElement('label');
-            label.className = 'form-label';
-            label.htmlFor = id;
-            label.textContent = `Penumpang ${number}`;
-            const input = document.createElement('input');
-            Object.assign(input, { id, type: 'text', className: 'form-input', maxLength: 60, autocomplete: 'off' });
-            input.dataset.rule = 'name';
-            input.dataset.passengerName = '';
-            input.dataset.itemKey = item.key;
-            input.setAttribute('aria-describedby', `${id}-error`);
-            const error = document.createElement('p');
-            Object.assign(error, { id: `${id}-error`, className: 'form-error', hidden: true });
-            wrapper.append(label, input, error);
-            inputs.append(wrapper);
+    picker.querySelector('[data-saved-address-new]').before(...addresses.map((item) => buildAddressCard(template, item)));
+    picker.hidden = false;
+
+    // Draf per pilihan ("new" / id kartu) agar ketikan & edit "Ubah" tidak hilang saat berpindah.
+    const drafts = new Map();
+    let current = null;
+    const showFields = (visible) => {
+        fields.hidden = !visible;
+        edit.hidden = visible;
+        edit.setAttribute('aria-expanded', String(visible));
+    };
+
+    const select = (id, { fill = true } = {}) => {
+        if (current !== null) {
+            drafts.set(current, { values: inputs.map((element) => element.value), revealed: !fields.hidden });
+        }
+        const item = addresses.find((entry) => entry.id === id);
+        current = item ? item.id : 'new';
+        picker.querySelector(`[name="saved-address"][value="${CSS.escape(current)}"]`).checked = true;
+        inputs.forEach((element) => clearError(element));
+        saveOption.hidden = Boolean(item);
+
+        const draft = drafts.get(current);
+        if (draft) {
+            inputs.forEach((element, index) => {
+                element.value = draft.values[index];
+            });
+        } else if (fill) {
+            Object.entries(ADDRESS_FIELDS).forEach(([name, key]) => {
+                input(name).value = item?.[key] ?? '';
+            });
+        }
+        if (!item) {
+            hint.hidden = true;
+            showFields(true);
+            return;
         }
 
-        return group;
-    }));
-}
+        // Alamat tersimpan yang tak lolos aturan checkout: tampilkan field + error langsung.
+        const invalid = inputs.filter((element) => inputError(element) !== null);
+        invalid.forEach((element) => validateInput(element));
+        hint.hidden = !(item.district === '' || item.province === '' || input('address_province').value !== item.province);
+        showFields(invalid.length > 0 || Boolean(draft?.revealed));
+    };
 
-function collectNames(form) {
-    const names = {};
-    form.querySelectorAll('[data-passenger-name]').forEach((input) => {
-        (names[input.dataset.itemKey] ??= []).push(input.value);
+    picker.addEventListener('change', (event) => {
+        if (event.target.name === 'saved-address') {
+            select(event.target.value);
+        }
+    });
+    // Edit sekali pakai; buku alamat tidak berubah.
+    edit.addEventListener('click', () => {
+        showFields(true);
+        inputs[0].focus();
     });
 
-    return names;
+    // Kembali dari pembayaran: pilih kartu yang sama persis, selain itu "Pakai alamat lain".
+    const match = restored && addresses.find((item) => item.address === restored.street && item.province === restored.province
+        && item.city === restored.city && item.district === restored.district && item.postal === restored.postalCode);
+    if (match) {
+        select(match.id);
+    } else if (restored) {
+        select('new', { fill: false });
+    } else {
+        select(addresses[0].id);
+    }
+
+    // Sesi dicek ulang saat submit: sudah keluar = tidak menyimpan.
+    return { shouldSave: () => isLoggedIn() && current === 'new' && saveCheckbox.checked };
 }
 
-function restorePassengerNames(form, names) {
-    const counters = {};
-    form.querySelectorAll('[data-passenger-name]').forEach((input) => {
-        const index = counters[input.dataset.itemKey] ?? 0;
-        counters[input.dataset.itemKey] = index + 1;
-        input.value = names[input.dataset.itemKey]?.[index] ?? '';
-    });
+function isLoggedIn() {
+    const session = readLocal(SESSION_KEY);
+
+    return typeof session?.name === 'string' && session.name.trim() !== '';
+}
+
+function buildAddressCard(template, item) {
+    const card = template.content.firstElementChild.cloneNode(true);
+    const slot = (name) => card.querySelector(`[data-slot="${name}"]`);
+    card.querySelector('[name="saved-address"]').value = item.id;
+    slot('label').textContent = item.label;
+    slot('primary').hidden = !item.primary;
+    slot('name').textContent = item.name;
+    slot('address').textContent = item.address;
+    slot('region').textContent = formatRegion(item);
+
+    return card;
+}
+
+function clearError(input) {
+    input.removeAttribute('aria-invalid');
+    const error = document.getElementById(`${input.id}-error`);
+    if (error) {
+        error.hidden = true;
+    }
+}
+
+/** Validasi ulang kursi di server (Livewire Checkout::validateSeats). */
+async function checkSeats(root, cart) {
+    const trips = cart.items.filter((item) => !isProductItem(item));
+    const items = trips.map(({ key, tripId, date, qty, seats }) => ({ key, tripId, date, qty, seats }));
+    if (items.length === 0) {
+        return { valid: true };
+    }
+
+    try {
+        const component = Livewire.find(root.closest('[wire\\:id]')?.getAttribute('wire:id'));
+        const result = await component.validateSeats(items);
+        if (result?.valid === true) {
+            return { valid: true };
+        }
+        // Awali tiap pesan dengan label trip agar jelas item mana yang bermasalah.
+        const errors = result?.errors && typeof result.errors === 'object' ? Object.entries(result.errors) : [];
+        const message = errors
+            .filter(([, error]) => typeof error === 'string')
+            .map(([key, error]) => {
+                const trip = trips.find((item) => item.key === key);
+                return trip ? `${trip.origin} → ${trip.destination}, ${trip.dateLabel}: ${error}` : error;
+            })
+            .join(' ');
+
+        return { valid: false, message: message || 'Kursi tidak tersedia. Pilih ulang kursi.' };
+    } catch {
+        return { valid: false, message: 'Gagal memeriksa kursi. Coba lagi.' };
+    }
+}
+
+function showSeatError(form, message) {
+    const box = form.querySelector('[data-seat-error]');
+    box.querySelector('[data-seat-error-message]').textContent = message ?? '';
+    box.hidden = !message;
 }
 
 /** Kembali dari pembayaran: isi ulang form. */
@@ -133,35 +279,12 @@ function restoreSaved(form, saved) {
     if (!saved?.contact) {
         return;
     }
-    form.querySelector('[data-field="contact_name"]').value = saved.contact.name ?? '';
-    form.querySelector('[data-field="contact_email"]').value = saved.contact.email ?? '';
-    form.querySelector('[data-field="contact_phone"]').value = saved.contact.phone ?? '';
-    (Array.isArray(saved.passengers) ? saved.passengers : []).filter((entry) => entry && typeof entry === 'object').forEach(({ itemKey, names }) => {
-        const inputs = [...form.querySelectorAll('[data-passenger-name]')].filter((input) => input.dataset.itemKey === itemKey);
-        inputs.forEach((input, index) => {
-            input.value = names?.[index] ?? '';
-        });
+    Object.entries(SAVED_FIELDS).forEach(([name, read]) => {
+        const value = read(saved);
+        form.querySelector(`[data-field="${name}"]`).value = typeof value === 'string' ? value : '';
     });
     const method = [...form.querySelectorAll('[name="method"]')].find((input) => input.value === saved.methodId);
     if (method) {
         method.checked = true;
     }
-}
-
-function initSameAsContact(form) {
-    const checkbox = form.querySelector('[data-same-as-contact]');
-    const contactName = form.querySelector('[data-field="contact_name"]');
-    if (!checkbox) {
-        return;
-    }
-
-    // Field penumpang bisa dirender ulang; cari setiap kali.
-    const sync = () => {
-        const firstPassenger = form.querySelector('[data-passenger-name]');
-        if (checkbox.checked && firstPassenger) {
-            firstPassenger.value = contactName.value;
-        }
-    };
-    checkbox.addEventListener('change', sync);
-    contactName.addEventListener('input', sync);
 }

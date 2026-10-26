@@ -178,6 +178,28 @@ class CatalogPageTest extends TestCase
         $this->assertSame(150000, $snapshot['price']);
         $this->assertSame(6, $snapshot['maxQty']);
         $this->assertSame([['id' => 11, 'name' => 'Pool Cawang', 'time' => '07:00']], $snapshot['pickups']);
+
+        $seatMap = DummyShop::seatMap(DummyShop::findTrip(1), $date);
+        $response->assertViewHas('seatMap', $seatMap);
+        $this->assertSame($seatMap['layout'], $snapshot['seatLayout']);
+        $this->assertSame($seatMap['occupied'], $snapshot['occupied']);
+        $this->assertSame(7, count(DummyShop::seatCodes($snapshot['seatLayout'])) - count($snapshot['occupied']));
+        $this->assertSame($snapshot['occupied'], $this->tripJson($this->get("/katalog/1?date={$date}")->getContent())['occupied']);
+    }
+
+    public function test_it_should_render_inline_seat_map_instead_of_qty_input_on_trip_detail(): void
+    {
+        $this->get('/katalog/1')
+            ->assertOk()
+            ->assertSee('data-seat-grid', false)
+            ->assertSee('data-seat-cell-template', false)
+            ->assertSee('data-seat-driver-template', false)
+            ->assertSee('data-seat-aisle-template', false)
+            ->assertSee('data-seat-summary', false)
+            ->assertSee('data-add-submit disabled', false)
+            ->assertSee('Maksimal 6 kursi per jadwal.')
+            ->assertDontSee('data-qty-input', false)
+            ->assertDontSee('id="jumlah-tiket"', false);
     }
 
     public function test_it_should_limit_quantity_to_seats_left_when_fewer_than_max(): void

@@ -1,7 +1,8 @@
-import { addItem } from './cart';
-import { showToast } from './toast';
+import { CART_KEY, getCart, seatCodes, upsertTrip } from './cart';
 import { formatRupiah } from './utils/format';
+import { checkedSeats, enforceSeatLimit, renderSeatMap } from './utils/seat-map';
 
+/** Detail trip: qty = jumlah kursi yang dipilih di denah. */
 export function initAddToCart(root) {
     const form = root.querySelector('[data-add-to-cart-form]');
     const trip = readTripJson(root);
@@ -9,30 +10,60 @@ export function initAddToCart(root) {
         return;
     }
 
-    const input = form.querySelector('[data-qty-input]');
+    const key = `${trip.tripId}|${trip.date}`;
+    const grid = form.querySelector('[data-seat-grid]');
+    const error = form.querySelector('[data-seat-error]');
+    const summary = form.querySelector('[data-seat-summary]');
     const subtotal = form.querySelector('[data-qty-subtotal]');
+    const submit = form.querySelector('[data-add-submit]');
     const notice = form.querySelector('[data-added-notice]');
+    const codes = seatCodes(trip.seatLayout);
 
-    const clamp = (value) => Math.min(Math.max(Math.trunc(Number(value)) || 1, 1), trip.maxQty);
+    // Trip yang sudah di keranjang: kursi dipilih ulang, tombol mengganti kursi.
+    const inCart = () => getCart().items.find((item) => item.key === key) ?? null;
+    const saved = (inCart()?.seats ?? [])
+        .filter((seat) => codes.includes(seat) && !trip.occupied.includes(seat))
+        .slice(0, trip.maxQty);
+    // Titik jemput/antar ikut item keranjang agar "Perbarui" tidak menimpanya.
+    [['[data-pickup]', inCart()?.pickup], ['[data-dropoff]', inCart()?.dropoff]].forEach(([selector, point]) => {
+        const select = form.querySelector(selector);
+        if (select && point && [...select.options].some((option) => option.value === String(point.id))) {
+            select.value = String(point.id);
+        }
+    });
+
+    const showError = (message) => {
+        error.textContent = message ?? '';
+        error.hidden = !message;
+    };
     const render = () => {
-        input.value = String(clamp(input.value));
-        subtotal.textContent = formatRupiah(trip.price * Number(input.value));
+        const seats = checkedSeats(grid);
+        summary.textContent = seats.length > 0 ? seats.join(', ') : '-';
+        subtotal.textContent = formatRupiah(trip.price * seats.length);
+        submit.disabled = seats.length < 1;
+        form.querySelector('[data-add-label]').textContent = inCart() ? 'Perbarui kursi di keranjang' : 'Tambah ke keranjang';
     };
 
-    form.querySelectorAll('[data-qty-step]').forEach((button) => {
-        button.addEventListener('click', () => {
-            input.value = String(clamp(Number(input.value) + Number(button.dataset.qtyStep)));
+    renderSeatMap(grid, { layout: trip.seatLayout, occupied: trip.occupied, selected: saved });
+
+    grid.addEventListener('change', (event) => {
+        const input = event.target.closest('[data-seat]');
+        if (input) {
+            showError(enforceSeatLimit(input, grid, trip.maxQty) ? null : `Maksimal ${trip.maxQty} kursi per jadwal.`);
             render();
-        });
+        }
     });
-    input.addEventListener('change', render);
 
     form.addEventListener('submit', (event) => {
         event.preventDefault();
-        render();
+        const seats = checkedSeats(grid);
+        if (seats.length < 1) {
+            showError('Pilih minimal 1 kursi.');
+            return;
+        }
 
-        const result = addItem({
-            key: `${trip.tripId}|${trip.date}`,
+        const result = upsertTrip({
+            key,
             tripId: trip.tripId,
             operator: trip.operator,
             vehicle: trip.vehicle,
@@ -43,23 +74,34 @@ export function initAddToCart(root) {
             depart: trip.depart,
             arrive: trip.arrive,
             price: trip.price,
-            qty: Number(input.value),
             maxQty: trip.maxQty,
             pickup: pickPoint(trip.pickups, form.querySelector('[data-pickup]')),
             dropoff: pickPoint(trip.dropoffs, form.querySelector('[data-dropoff]')),
+            seatLayout: trip.seatLayout,
+            occupied: trip.occupied,
+            seats,
             addedAt: new Date().toISOString(),
         });
 
-        if (result.added === 0) {
-            showToast(`Batas maksimal ${result.maxQty} tiket untuk jadwal ini sudah tercapai`);
+        if (!result) {
+            showError('Kursi tidak valid. Pilih ulang kursi.');
             return;
         }
+        showError(null);
+        notice.querySelector('[data-added-text]').textContent = result === 'updated'
+            ? `Kursi di keranjang diperbarui: ${seats.join(', ')}`
+            : 'Ditambahkan ke keranjang';
         notice.hidden = false;
-        showToast(result.qty === result.maxQty && result.added < Number(input.value)
-            ? `Hanya ${result.added} tiket ditambahkan (maksimal ${result.maxQty} per jadwal)`
-            : 'Tiket ditambahkan ke keranjang');
+        render();
     });
 
+    window.addEventListener('cart:change', render);
+    // Keranjang diubah di tab lain: sinkronkan label tombol.
+    window.addEventListener('storage', (event) => {
+        if (event.key === CART_KEY || event.key === null) {
+            render();
+        }
+    });
     render();
 }
 

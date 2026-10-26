@@ -4,7 +4,8 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
-        "dev": "vite"
+        "dev": "vite",
+        "serve": "concurrently -c \"#93c5fd,#fdba74\" --names=server,vite --kill-others \"php artisan serve\" \"vite\""
     },
     "devDependencies": {
         "@fontsource-variable/montserrat": "^5.3.0",

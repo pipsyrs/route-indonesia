@@ -20,6 +20,8 @@
         'maxQty' => $maxQty,
         'pickups' => array_map(fn ($point) => ['id' => $point['id'], 'name' => $point['name'], 'time' => $point['time']], $trip['pickups']),
         'dropoffs' => array_map(fn ($point) => ['id' => $point['id'], 'name' => $point['name'], 'time' => $point['time']], $trip['dropoffs']),
+        'seatLayout' => $seatMap['layout'],
+        'occupied' => $seatMap['occupied'],
     ];
     $isSoldOut = $maxQty < 1;
 @endphp
@@ -118,37 +120,41 @@
                         </select>
                     @endif
 
-                    <div class="mt-5 flex items-center justify-between gap-4">
-                        <label for="jumlah-tiket" class="text-sm font-medium text-ink">Jumlah tiket</label>
-                        <div class="flex items-center rounded-md border border-line-strong">
-                            <button type="button" class="grid size-10 place-items-center text-ink-muted hover:text-ink disabled:opacity-40" data-qty-step="-1" @disabled($isSoldOut)>
-                                <x-icon name="minus" class="size-4" />
-                                <span class="sr-only">Kurangi</span>
-                            </button>
-                            <input id="jumlah-tiket" type="number" inputmode="numeric" min="1" max="{{ max($maxQty, 1) }}" value="1"
-                                   class="w-12 border-0 bg-transparent text-center font-semibold tabular-nums text-ink [appearance:textfield] focus:outline-none [&::-webkit-inner-spin-button]:appearance-none"
-                                   data-qty-input @disabled($isSoldOut)>
-                            <button type="button" class="grid size-10 place-items-center text-ink-muted hover:text-ink disabled:opacity-40" data-qty-step="1" @disabled($isSoldOut)>
-                                <x-icon name="plus" class="size-4" />
-                                <span class="sr-only">Tambah</span>
-                            </button>
+                    @unless ($isSoldOut)
+                        {{-- Denah inline: jumlah tiket = jumlah kursi dipilih (add-to-cart.js) --}}
+                        <fieldset class="mt-5" aria-describedby="kursi-hint">
+                            <legend class="text-sm font-medium text-ink">Pilih kursi</legend>
+                            <p id="kursi-hint" class="form-hint mt-0.5">Maksimal {{ $maxQty }} kursi per jadwal. Bagian depan kendaraan di atas.</p>
+                            <div class="mx-auto mt-3 grid w-full max-w-72 gap-2 rounded-lg border border-line bg-surface p-3" data-seat-grid></div>
+                            <ul class="mt-3 flex flex-wrap justify-center gap-x-4 gap-y-2 text-xs text-ink-muted" aria-label="Keterangan denah">
+                                <li class="flex items-center gap-2"><span class="size-4 rounded-md border border-line-strong bg-seat-available"></span> Tersedia</li>
+                                <li class="flex items-center gap-2"><span class="size-4 rounded-md bg-seat-occupied"></span> Terisi</li>
+                                <li class="flex items-center gap-2"><span class="size-4 rounded-md bg-seat-selected"></span> Dipilih</li>
+                                <li class="flex items-center gap-2"><x-icon name="steering-wheel" class="size-4 text-ink-subtle" /> Sopir</li>
+                            </ul>
+                            <p class="form-error text-center" role="alert" data-seat-error hidden></p>
+                        </fieldset>
+
+                        <div class="mt-5 space-y-2 border-t border-line pt-4">
+                            <p class="flex justify-between gap-4 text-sm" aria-live="polite">
+                                <span class="text-ink-muted">Kursi dipilih</span>
+                                <span class="text-right font-semibold tabular-nums text-ink" data-seat-summary>-</span>
+                            </p>
+                            <p class="flex items-baseline justify-between gap-4">
+                                <span class="text-sm font-semibold text-ink">Subtotal</span>
+                                <x-price :amount="0" class="text-xl font-bold text-brand-ink" data-qty-subtotal />
+                            </p>
                         </div>
-                    </div>
-                    <p class="form-hint">Maksimal {{ $maxQty }} tiket per jadwal.</p>
+                    @endunless
 
-                    <div class="mt-5 flex items-baseline justify-between gap-4 border-t border-line pt-4">
-                        <span class="text-sm font-semibold text-ink">Subtotal</span>
-                        <x-price :amount="$trip['price']" class="text-xl font-bold text-brand-ink" data-qty-subtotal />
-                    </div>
-
-                    <button type="submit" class="btn-primary mt-5 w-full py-3" @disabled($isSoldOut)>
+                    <button type="submit" class="btn-primary mt-5 w-full py-3" data-add-submit disabled>
                         <x-icon name="shopping-cart" class="size-5" />
-                        {{ $isSoldOut ? 'Kursi habis' : 'Tambah ke keranjang' }}
+                        <span data-add-label>{{ $isSoldOut ? 'Kursi habis' : 'Tambah ke keranjang' }}</span>
                     </button>
 
-                    {{-- Muncul setelah item ditambahkan --}}
+                    {{-- Muncul setelah item ditambahkan/diperbarui; satu-satunya pengumuman (tanpa toast) --}}
                     <div class="mt-4 rounded-md bg-ok-soft p-4 text-sm text-ok-ink" data-added-notice role="status" hidden>
-                        <p class="flex items-center gap-2 font-semibold"><x-icon name="circle-check" class="size-5" /> Ditambahkan ke keranjang</p>
+                        <p class="flex items-center gap-2 font-semibold"><x-icon name="circle-check" class="size-5" /> <span data-added-text>Ditambahkan ke keranjang</span></p>
                         <a href="{{ route('cart') }}" class="btn-primary mt-3 w-full">Lihat keranjang</a>
                     </div>
                 </form>
@@ -156,5 +162,6 @@
         </div>
     </div>
 
+    <x-seat-map-templates />
     <script type="application/json" data-trip-json>@json($tripForCart)</script>
 @endsection

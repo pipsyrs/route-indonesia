@@ -1,4 +1,4 @@
-import { SESSION_KEY } from './cart';
+import { CHECKOUT_KEY, SESSION_KEY } from './cart';
 import { showToast } from './toast';
 import { readLocal, removeLocal, writeLocal } from './utils/storage';
 import { bindLiveValidation, validateForm } from './utils/validate';
@@ -45,6 +45,8 @@ export function initAccountForms(root) {
         button.addEventListener('click', () => {
             removeLocal(SESSION_KEY);
             removeLocal('ri_addresses');
+            // Draf checkout berisi alamat (PII); jangan tertinggal setelah keluar.
+            removeLocal(CHECKOUT_KEY);
             location.assign(button.dataset.redirect);
         });
     });

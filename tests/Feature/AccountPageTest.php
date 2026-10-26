@@ -105,6 +105,20 @@ class AccountPageTest extends TestCase
             ->assertSee('aria-current="page"', false);
     }
 
+    public function test_it_should_render_province_and_district_fields_in_address_form(): void
+    {
+        $html = $this->get('/akun/alamat')
+            ->assertOk()
+            ->assertViewHas('provinces', DummyShop::provinces())
+            ->assertSee('data-field="province" data-rule="option"', false)
+            ->assertSee('data-field="district" data-rule="place"', false)
+            ->getContent();
+
+        foreach (DummyShop::provinces() as $province) {
+            $this->assertStringContainsString("<option value=\"{$province}\">{$province}</option>", $html);
+        }
+    }
+
     public function test_it_should_offer_logout_that_redirects_home(): void
     {
         $this->get('/akun')

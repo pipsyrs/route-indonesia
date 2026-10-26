@@ -87,19 +87,36 @@
                             <label for="alamat-lengkap" class="form-label">Alamat lengkap</label>
                             <textarea id="alamat-lengkap" rows="3" class="form-input resize-none" autocomplete="street-address" maxlength="200"
                                       placeholder="Nama jalan, nomor rumah, RT/RW, kelurahan"
-                                      data-field="address" data-rule="required" aria-describedby="alamat-lengkap-error"></textarea>
+                                      data-field="address" data-rule="address" aria-describedby="alamat-lengkap-error"></textarea>
                             <p id="alamat-lengkap-error" class="form-error" hidden></p>
+                        </div>
+                        <div>
+                            <label for="alamat-provinsi" class="form-label">Provinsi</label>
+                            <select id="alamat-provinsi" class="form-input appearance-none" autocomplete="address-level1"
+                                    data-field="province" data-rule="option" aria-describedby="alamat-provinsi-error">
+                                <option value="">Pilih provinsi</option>
+                                @foreach ($provinces as $province)
+                                    <option value="{{ $province }}">{{ $province }}</option>
+                                @endforeach
+                            </select>
+                            <p id="alamat-provinsi-error" class="form-error" hidden></p>
                         </div>
                         <div>
                             <label for="alamat-kota" class="form-label">Kota/Kabupaten</label>
                             <input id="alamat-kota" type="text" class="form-input" autocomplete="address-level2" maxlength="60"
-                                   data-field="city" data-rule="required" aria-describedby="alamat-kota-error">
+                                   data-field="city" data-rule="place" aria-describedby="alamat-kota-error">
                             <p id="alamat-kota-error" class="form-error" hidden></p>
+                        </div>
+                        <div>
+                            <label for="alamat-kecamatan" class="form-label">Kecamatan</label>
+                            <input id="alamat-kecamatan" type="text" class="form-input" autocomplete="address-level3" maxlength="60"
+                                   data-field="district" data-rule="place" aria-describedby="alamat-kecamatan-error">
+                            <p id="alamat-kecamatan-error" class="form-error" hidden></p>
                         </div>
                         <div>
                             <label for="alamat-pos" class="form-label">Kode pos</label>
                             <input id="alamat-pos" type="text" class="form-input tabular-nums" autocomplete="postal-code" inputmode="numeric" maxlength="5"
-                                   data-field="postal" data-postal aria-describedby="alamat-pos-error">
+                                   data-field="postal" data-rule="postal" data-postal aria-describedby="alamat-pos-error">
                             <p id="alamat-pos-error" class="form-error" hidden></p>
                         </div>
                     </div>

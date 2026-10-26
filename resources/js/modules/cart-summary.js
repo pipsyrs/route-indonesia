@@ -27,7 +27,7 @@ export function renderCartSummary(root, cart, { withItems = false } = {}) {
             label.className = 'min-w-0 text-ink-muted';
             label.textContent = isProductItem(item)
                 ? `${item.name} × ${item.qty}`
-                : `${item.origin} → ${item.destination}, ${item.depart} × ${item.qty}`;
+                : `${item.origin} → ${item.destination}, ${item.depart} × ${item.qty}${item.seats.length > 0 ? ` · Kursi ${item.seats.join(', ')}` : ''}`;
             const price = document.createElement('span');
             price.className = 'shrink-0 text-ink';
             price.textContent = formatRupiah(item.price * item.qty);

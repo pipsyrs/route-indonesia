@@ -41,6 +41,7 @@ class AccountController extends Controller
     {
         return view('pages.account.addresses', [
             'user' => DummyShop::user(),
+            'provinces' => DummyShop::provinces(),
         ]);
     }
 

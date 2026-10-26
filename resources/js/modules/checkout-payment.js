@@ -1,4 +1,4 @@
-import { CART_KEY, CHECKOUT_KEY, LAST_ORDER_KEY, PAYMENT_KEY, cartTotals, clearCart, getCart, isProductItem } from './cart';
+import { CART_KEY, CHECKOUT_KEY, LAST_ORDER_KEY, PAYMENT_KEY, allSeatsComplete, cartSignature, cartTotals, clearCart, getCart } from './cart';
 import { renderCartSummary } from './cart-summary';
 import { formatRupiah } from './utils/format';
 import { readLocal, removeLocal, writeLocal } from './utils/storage';
@@ -63,7 +63,6 @@ export function initCheckoutPayment(root) {
             bookingCode: payment.bookingCode,
             items: getCart().items,
             contact: checkout.contact,
-            passengers: checkout.passengers,
             methodName: payment.methodName,
             subtotal: checkout.subtotal,
             serviceFee: checkout.serviceFee,
@@ -82,14 +81,11 @@ export function initCheckoutPayment(root) {
     renderAll();
 }
 
-/** Isi & total keranjang harus sama persis dengan snapshot checkout. */
+/** Isi, kursi & total keranjang harus sama persis dengan snapshot checkout. */
 function matchesCheckout(cart, checkout) {
-    const passengers = Array.isArray(checkout.passengers) ? checkout.passengers : [];
-    const tickets = cart.items.filter((item) => !isProductItem(item));
-    const sameItems = passengers.length === tickets.length
-        && tickets.every((item) => passengers.find((entry) => entry.itemKey === item.key)?.names?.length === item.qty);
-
-    return sameItems && cartTotals(checkout.serviceFee ?? 0, cart).total === checkout.total;
+    return checkout.signature === cartSignature(cart)
+        && allSeatsComplete(cart)
+        && cartTotals(checkout.serviceFee ?? 0, cart).total === checkout.total;
 }
 
 /** Pakai ulang tagihan yang masih berlaku untuk metode & total yang sama. */

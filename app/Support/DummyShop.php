@@ -170,6 +170,100 @@ class DummyShop
         return $orders;
     }
 
+    /** @return list<list<string|null>> format FleetSeeder::SEAT_LAYOUT_14: 'D' = sopir, null = lorong */
+    public static function seatLayout(string $vehicle): array
+    {
+        return match ($vehicle) {
+            'Hiace Premio' => [
+                ['D', null, null, '1'],
+                ['2', null, '3', '4'],
+                ['5', null, '6', '7'],
+                ['8', null, '9', '10'],
+            ],
+            'Elf Long' => [
+                ['D', null, '1', '2'],
+                ['3', null, '4', '5'],
+                ['6', null, '7', '8'],
+                ['9', null, '10', '11'],
+                ['12', null, '13', '14'],
+                ['15', '16', '17', '18'],
+            ],
+            // 2-lorong-2, 8 baris x 4 kursi.
+            'Executive Bus' => [
+                ['D', null, null, null, null],
+                ...array_map(
+                    fn (int $row) => [(string) ($row * 4 + 1), (string) ($row * 4 + 2), null, (string) ($row * 4 + 3), (string) ($row * 4 + 4)],
+                    range(0, 7),
+                ),
+            ],
+            default => [
+                ['D', null, null, '1'],
+                ['2', null, '3', '4'],
+                ['5', null, '6', '7'],
+                ['8', null, '9', '10'],
+                ['11', '12', '13', '14'],
+            ],
+        };
+    }
+
+    /**
+     * @param  list<list<string|null>>  $layout
+     * @return list<string> kode kursi, urut baris
+     */
+    public static function seatCodes(array $layout): array
+    {
+        return array_values(array_filter(
+            array_merge(...$layout),
+            fn (?string $cell) => $cell !== null && $cell !== 'D',
+        ));
+    }
+
+    /** @return list<string> kursi terisi, deterministik per trip+tanggal, urut numerik */
+    public static function occupiedSeats(int $tripId, string $date): array
+    {
+        $trip = self::findTrip($tripId);
+        if ($trip === null) {
+            return [];
+        }
+
+        $seats = self::seatCodes(self::seatLayout($trip['vehicle']));
+        $count = max(0, count($seats) - $trip['seats_left']);
+
+        // md5 dulu: crc32 linear, tanpa itu pola kursi nyaris sama antar tanggal.
+        $rank = fn (string $seat) => crc32(md5("{$tripId}|{$date}|{$seat}"));
+        usort($seats, fn (string $a, string $b) => $rank($a) <=> $rank($b) ?: strnatcmp($a, $b));
+        $occupied = array_slice($seats, 0, $count);
+        usort($occupied, 'strnatcmp');
+
+        return $occupied;
+    }
+
+    /**
+     * @param  array<string, mixed>  $trip
+     * @return array{layout: list<list<string|null>>, occupied: list<string>}
+     */
+    public static function seatMap(array $trip, string $date): array
+    {
+        return [
+            'layout' => self::seatLayout($trip['vehicle']),
+            'occupied' => self::occupiedSeats($trip['id'], $date),
+        ];
+    }
+
+    /** @return list<string> 38 provinsi, urut abjad */
+    public static function provinces(): array
+    {
+        return [
+            'Aceh', 'Bali', 'Banten', 'Bengkulu', 'DI Yogyakarta', 'DKI Jakarta', 'Gorontalo', 'Jambi',
+            'Jawa Barat', 'Jawa Tengah', 'Jawa Timur', 'Kalimantan Barat', 'Kalimantan Selatan',
+            'Kalimantan Tengah', 'Kalimantan Timur', 'Kalimantan Utara', 'Kepulauan Bangka Belitung',
+            'Kepulauan Riau', 'Lampung', 'Maluku', 'Maluku Utara', 'Nusa Tenggara Barat', 'Nusa Tenggara Timur',
+            'Papua', 'Papua Barat', 'Papua Barat Daya', 'Papua Pegunungan', 'Papua Selatan', 'Papua Tengah',
+            'Riau', 'Sulawesi Barat', 'Sulawesi Selatan', 'Sulawesi Tengah', 'Sulawesi Tenggara',
+            'Sulawesi Utara', 'Sumatera Barat', 'Sumatera Selatan', 'Sumatera Utara',
+        ];
+    }
+
     /** @param  list<string>  $facilities */
     private static function makeTrip(
         int $id,

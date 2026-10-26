@@ -73,7 +73,7 @@ class HomeBannerAndFooterTest extends TestCase
 
     public function test_it_should_hide_bank_list_and_social_icons_when_env_is_empty(): void
     {
-        config(['services.social' => ['instagram' => null, 'tiktok' => null, 'facebook' => null]]);
+        config(['services.social' => ['instagram' => null, 'tiktok' => null, 'facebook' => null], 'services.whatsapp.number' => null]);
 
         $this->get('/')
             ->assertOk()
