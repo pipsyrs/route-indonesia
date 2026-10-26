@@ -18,6 +18,14 @@
             @else
                 <x-icon name="shopping-cart" class="absolute inset-0 m-auto size-12 text-line-strong" />
             @endif
+
+            @if (! empty($product['model3d']['variants']))
+                <button type="button" aria-haspopup="dialog" data-modal-open="product-viewer-modal"
+                        class="absolute bottom-4 left-4 inline-flex items-center gap-2 rounded-full bg-surface/90 px-4 py-2.5 text-sm font-semibold text-ink shadow-lg shadow-ink/10 backdrop-blur transition hover:bg-surface active:scale-[0.98]">
+                    <x-icon name="cube" class="size-4" />
+                    {{ __('Try Virtually') }}
+                </button>
+            @endif
         </div>
 
         <div class="flex flex-col md:py-6">
@@ -47,16 +55,9 @@
             </div>
         </div>
     </article>
-
-    @if (count($related) > 0)
-        <section class="container-page border-t border-line pt-10 md:pt-14" aria-labelledby="related-title">
-            <h2 id="related-title" class="text-2xl font-light tracking-tight text-ink">{{ __('You may also like') }}</h2>
-            <ul class="product-grid mt-4 lg:grid-cols-4">
-                @foreach ($related as $item)
-                    <li><x-product-card :product="$item" /></li>
-                @endforeach
-            </ul>
-        </section>
-    @endif
+    
     <x-product-buy-modal />
+    @if (! empty($product['model3d']['variants']))
+        <x-product-viewer-modal :product="$product" />
+    @endif
 @endsection

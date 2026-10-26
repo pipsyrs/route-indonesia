@@ -5,6 +5,9 @@ use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ShopController;
 use App\Http\Middleware\SetLocale;
+use App\Livewire\Pages\Checkout;
+use App\Livewire\Pages\Payment;
+use App\Livewire\Pages\PaymentSuccess;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -27,10 +30,11 @@ Route::controller(ShopController::class)->group(function () {
     // Maksimal 10 digit tanpa nol di depan: angka di luar batas int jadi 404, bukan 500.
     Route::get('/katalog/{id}', 'show')->where('id', '[1-9][0-9]{0,9}')->name('catalog.show');
     Route::get('/keranjang', 'cart')->name('cart');
-    Route::get('/checkout', 'checkout')->name('checkout');
-    Route::get('/pembayaran', 'payment')->name('payment');
-    Route::get('/pembayaran/selesai', 'success')->name('payment.success');
 });
+
+Route::get('/checkout', Checkout::class)->name('checkout');
+Route::get('/pembayaran', Payment::class)->name('payment');
+Route::get('/pembayaran/selesai', PaymentSuccess::class)->name('payment.success');
 
 Route::controller(AccountController::class)->group(function () {
     Route::get('/masuk', 'login')->name('login');

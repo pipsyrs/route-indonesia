@@ -2,6 +2,7 @@
 @php
     $statusLabels = [
         'pending' => ['label' => 'Menunggu bayar', 'class' => 'bg-warn-soft text-warn-ink'],
+        'awaiting_confirmation' => ['label' => 'Menunggu konfirmasi', 'class' => 'bg-warn-soft text-warn-ink'],
         'paid' => ['label' => 'Lunas', 'class' => 'bg-brand-soft text-brand-ink'],
         'completed' => ['label' => 'Selesai', 'class' => 'bg-ok-soft text-ok-ink'],
         'cancelled' => ['label' => 'Dibatalkan', 'class' => 'bg-danger-soft text-danger-ink'],

@@ -20,7 +20,7 @@
         </div>
     </a>
 
-    <button type="button" class="btn-outline mt-4 w-full py-2 text-xs tracking-[0.14em] uppercase"
+    <button type="button" class="btn mt-4 w-full py-2 text-xs tracking-[0.14em] uppercase"
             data-modal-open="product-buy-modal"
             data-product-slug="{{ $product['slug'] }}"
             data-product-name="{{ $product['name'] }}"

@@ -10,18 +10,20 @@
             <p class="shrink-0 text-sm text-ink-muted tabular-nums" data-product-price></p>
         </div>
 
-        <label for="product-buy-qty" class="form-label mt-6">{{ __('Quantity') }}</label>
-        <div class="flex w-fit items-center rounded-md border border-line-strong">
-            <button type="button" class="grid size-10 place-items-center text-ink-muted hover:text-ink disabled:opacity-40" data-qty-step="-1">
-                <x-icon name="minus" class="size-4" /><span class="sr-only">{{ __('Decrease') }}</span>
-            </button>
-            <input id="product-buy-qty" type="number" inputmode="numeric" min="1" max="10" step="1" value="1" autofocus
-                   aria-describedby="product-buy-qty-error"
-                   class="w-12 border-0 bg-transparent text-center text-sm font-semibold tabular-nums text-ink [appearance:textfield] focus:outline-none [&::-webkit-inner-spin-button]:appearance-none"
-                   data-qty-input>
-            <button type="button" class="grid size-10 place-items-center text-ink-muted hover:text-ink disabled:opacity-40" data-qty-step="1">
-                <x-icon name="plus" class="size-4" /><span class="sr-only">{{ __('Increase') }}</span>
-            </button>
+        <div class="mt-6 flex justify-between items-baseline gap-4">
+            <label for="product-buy-qty" class="form-label mt-6">{{ __('Quantity') }}</label>
+            <div class="flex w-fit items-center rounded-md border border-line-strong">
+                <button type="button" class="grid size-10 place-items-center text-ink-muted hover:text-ink disabled:opacity-40" data-qty-step="-1">
+                    <x-icon name="minus" class="size-4" /><span class="sr-only">{{ __('Decrease') }}</span>
+                </button>
+                <input id="product-buy-qty" type="number" inputmode="numeric" min="1" max="10" step="1" value="1" autofocus
+                    aria-describedby="product-buy-qty-error"
+                    class="w-12 border-0 bg-transparent text-center text-sm font-semibold tabular-nums text-ink [appearance:textfield] focus:outline-none [&::-webkit-inner-spin-button]:appearance-none"
+                    data-qty-input>
+                <button type="button" class="grid size-10 place-items-center text-ink-muted hover:text-ink disabled:opacity-40" data-qty-step="1">
+                    <x-icon name="plus" class="size-4" /><span class="sr-only">{{ __('Increase') }}</span>
+                </button>
+            </div>
         </div>
         <p id="product-buy-qty-error" class="form-error" data-qty-error hidden></p>
     </form>

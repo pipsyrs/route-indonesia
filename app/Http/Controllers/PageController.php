@@ -556,7 +556,7 @@ class PageController extends Controller
     /**
      * Produk dummy untuk home & shop (belum ada tabel).
      *
-     * @return list<array{slug: string, name: string, brand: string, category: string, price: int, description: string, image: ?string, badge: ?string}>
+     * @return list<array{slug: string, name: string, brand: string, category: string, price: int, description: string, image: ?string, badge: ?string, model3d?: array{variants: list<array{name: string, thumbnail: ?string, src: string}>, attribution?: ?string}}>
      */
     private function products(): array
     {
@@ -610,6 +610,14 @@ class PageController extends Controller
                 'description' => __('Hard-shell 20-inch carry-on with smooth spinner wheels.'),
                 'image' => 'https://picsum.photos/seed/routeindonesia-cabin-suitcase/800/800',
                 'badge' => __('Best Seller'),
+                // Opsional: viewer 3D "Coba Virtual"; path relatif public/ (nanti dari upload admin).
+                'model3d' => [
+                    'variants' => [
+                        ['name' => __('Olive Green'), 'thumbnail' => 'models/thumbs/vintage-suitcase-olive.webp', 'src' => 'models/vintage-suitcase-olive.glb'],
+                        ['name' => __('Travel Stickers'), 'thumbnail' => 'models/thumbs/vintage-suitcase-stickers.webp', 'src' => 'models/vintage-suitcase-stickers.glb'],
+                    ],
+                    'attribution' => 'Vintage Suitcase — Maximilian Schuster, Poly Haven (CC0)',
+                ],
             ],
             [
                 'slug' => 'leather-weekender-bag',

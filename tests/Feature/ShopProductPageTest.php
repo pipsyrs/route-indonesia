@@ -20,6 +20,24 @@ class ShopProductPageTest extends TestCase
                 && ! in_array('waterproof-daypack', array_column($related, 'slug'), true));
     }
 
+    public function test_it_should_render_3d_viewer_when_product_has_model3d(): void
+    {
+        $this->get('/shop/cabin-suitcase')
+            ->assertOk()
+            ->assertSee('data-modal-open="product-viewer-modal"', false)
+            ->assertSee('id="product-viewer-modal"', false)
+            ->assertSee('models/vintage-suitcase-olive.glb', false)
+            ->assertSee('models/vintage-suitcase-stickers.glb', false);
+    }
+
+    public function test_it_should_not_render_3d_viewer_when_product_has_no_model3d(): void
+    {
+        $this->get('/shop/waterproof-daypack')
+            ->assertOk()
+            ->assertDontSee('product-viewer-modal', false)
+            ->assertDontSee('<model-viewer', false);
+    }
+
     public function test_it_should_return_404_when_slug_does_not_exist(): void
     {
         $this->get('/shop/not-a-product')->assertNotFound();

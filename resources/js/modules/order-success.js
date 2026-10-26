@@ -1,4 +1,5 @@
 import { LAST_ORDER_KEY, isProductItem, isValidItem } from './cart';
+import { AWAITING_CONFIRMATION } from './checkout-payment';
 import { formatRupiah } from './utils/format';
 import { readLocal, writeLocal } from './utils/storage';
 
@@ -18,7 +19,22 @@ export function initOrderSuccess(root) {
         scope.querySelector(`[data-field="${name}"]`).textContent = value;
     };
 
-    set(page, 'email', order.contact?.email ?? 'email pemesan');
+    // Pesanan lama tanpa status tetap tampil sebagai "berhasil".
+    const isAwaiting = order.status === AWAITING_CONFIRMATION;
+    page.querySelectorAll('[data-status-awaiting]').forEach((element) => {
+        element.hidden = !isAwaiting;
+    });
+    page.querySelectorAll('[data-status-paid]').forEach((element) => {
+        element.hidden = isAwaiting;
+    });
+    page.querySelector('[data-print]').hidden = isAwaiting;
+    if (isAwaiting) {
+        set(page, 'total-label', 'Total tagihan');
+    }
+
+    page.querySelectorAll('[data-field="email"]').forEach((element) => {
+        element.textContent = order.contact?.email ?? 'email pemesan';
+    });
     set(page, 'code', order.bookingCode);
     set(page, 'subtotal', formatRupiah(order.subtotal ?? 0));
     set(page, 'fee', formatRupiah(order.serviceFee ?? 0));

@@ -2,7 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Livewire\Pages\Checkout;
+use App\Livewire\Pages\Payment;
+use App\Livewire\Pages\PaymentSuccess;
 use App\Support\DummyShop;
+use Livewire\Livewire;
 use Tests\TestCase;
 
 /**
@@ -22,45 +26,39 @@ class CheckoutFlowPageTest extends TestCase
             ->assertSee('data-cart-empty', false);
     }
 
-    public function test_it_should_render_checkout_with_all_payment_methods(): void
+    public function test_it_should_render_checkout_as_livewire_page_with_payment_methods(): void
     {
-        $response = $this->get('/checkout');
+        $this->get('/checkout')
+            ->assertOk()
+            ->assertSeeLivewire(Checkout::class)
+            ->assertSee('<title>Checkout | ', false);
 
-        $response->assertOk()
-            ->assertViewIs('pages.checkout')
-            ->assertViewHas('paymentMethods', DummyShop::paymentMethods())
-            ->assertSee('data-module="checkout"', false)
-            ->assertSee('data-empty-url="'.route('cart').'"', false)
-            ->assertSee('data-next-url="'.route('payment').'"', false);
-
-        foreach (['bca_va', 'bni_va', 'mandiri_va', 'qris'] as $methodId) {
-            $response->assertSee('value="'.$methodId.'"', false);
-        }
+        Livewire::test(Checkout::class)
+            ->assertViewIs('livewire.pages.checkout')
+            ->assertViewHas('serviceFee', DummyShop::SERVICE_FEE)
+            ->assertViewMissing('paymentMethods');
     }
 
-    public function test_it_should_render_payment_with_method_json_for_js(): void
+    public function test_it_should_render_payment_as_livewire_page_with_bank_accounts(): void
     {
-        $response = $this->get('/pembayaran');
+        $this->get('/pembayaran')
+            ->assertOk()
+            ->assertSeeLivewire(Payment::class)
+            ->assertSee('<title>Pembayaran | ', false);
 
-        $response->assertOk()
-            ->assertViewIs('pages.payment-new')
-            ->assertSee('data-module="checkout-payment"', false)
-            ->assertSee('data-back-url="'.route('checkout').'"', false)
-            ->assertSee('data-success-url="'.route('payment.success').'"', false);
-
-        $this->assertSame(1, preg_match('#<script type="application/json" data-payment-methods>(.*?)</script>#s', $response->getContent(), $match));
-        $methods = json_decode($match[1], true, flags: JSON_THROW_ON_ERROR);
-        $this->assertSame(['bca_va', 'bni_va', 'mandiri_va', 'qris'], array_column($methods, 'id'));
-        $this->assertSame(['id', 'name', 'type'], array_keys($methods[0]));
+        Livewire::test(Payment::class)
+            ->assertViewIs('livewire.pages.payment')
+            ->assertViewMissing('paymentMethods');
     }
 
-    public function test_it_should_render_success_shell_without_server_data(): void
+    public function test_it_should_render_success_as_livewire_page(): void
     {
         $this->get('/pembayaran/selesai')
             ->assertOk()
-            ->assertViewIs('pages.payment-success')
-            ->assertSee('data-module="order-success"', false)
-            ->assertSee('data-success-root', false);
+            ->assertSeeLivewire(PaymentSuccess::class)
+            ->assertSee('<title>Bukti pembayaran terkirim | ', false);
+
+        Livewire::test(PaymentSuccess::class)->assertViewIs('livewire.pages.payment-success');
     }
 
     public function test_it_should_ignore_query_string_on_client_rendered_pages(): void

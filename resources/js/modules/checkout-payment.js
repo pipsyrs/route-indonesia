@@ -6,7 +6,9 @@ import { readLocal, removeLocal, writeLocal } from './utils/storage';
 const PAYMENT_WINDOW_MS = 30 * 60 * 1000;
 const WARNING_THRESHOLD_MS = 5 * 60 * 1000;
 const CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-const VA_PREFIX = { bca_va: '8808', bni_va: '9881', mandiri_va: '8900' };
+// Satu-satunya metode: transfer manual, dikonfirmasi admin.
+const METHOD = { id: 'bank_transfer', name: 'Transfer Bank', type: 'bank_transfer' };
+export const AWAITING_CONFIRMATION = 'awaiting_confirmation';
 
 export function initCheckoutPayment(root) {
     const page = root.querySelector('[data-payment-root]');
@@ -27,14 +29,7 @@ export function initCheckoutPayment(root) {
         }
     });
 
-    const methods = readJson(root, '[data-payment-methods]') ?? [];
-    const method = methods.find((item) => item.id === checkout.methodId);
-    if (!method) {
-        location.replace(page.dataset.backUrl);
-        return;
-    }
-
-    let payment = resolvePayment(checkout, method);
+    let payment = resolvePayment(checkout, METHOD);
     let timer = null;
 
     const renderAll = () => {
@@ -48,17 +43,20 @@ export function initCheckoutPayment(root) {
     };
 
     root.querySelector('[data-payment-renew]').addEventListener('click', () => {
-        payment = createPayment(checkout, method);
+        payment = createPayment(checkout, METHOD);
         writeLocal(PAYMENT_KEY, payment);
         renderAll();
+        // Buka kunci form bukti (state Alpine) untuk tagihan baru.
+        window.dispatchEvent(new CustomEvent('payment-bill-renewed'));
         root.querySelector('[data-countdown]').focus();
     });
 
-    root.querySelector('[data-pay-confirm]').addEventListener('click', (event) => {
+    // Dikirim komponen Livewire Payment setelah bukti valid diterima server.
+    window.addEventListener('payment-proof-submitted', () => {
         if (payment.status !== 'pending') {
             return;
         }
-        event.currentTarget.disabled = true;
+        clearInterval(timer);
         writeLocal(LAST_ORDER_KEY, {
             bookingCode: payment.bookingCode,
             items: getCart().items,
@@ -68,7 +66,8 @@ export function initCheckoutPayment(root) {
             subtotal: checkout.subtotal,
             serviceFee: checkout.serviceFee,
             total: checkout.total,
-            paidAt: new Date().toISOString(),
+            status: AWAITING_CONFIRMATION,
+            submittedAt: new Date().toISOString(),
         });
         removeLocal(CHECKOUT_KEY);
         removeLocal(PAYMENT_KEY);
@@ -117,8 +116,6 @@ function createPayment(checkout, method) {
         methodId: method.id,
         methodName: method.name,
         type: method.type,
-        vaNumber: method.type === 'va' ? `${VA_PREFIX[method.id] ?? '8808'}${randomString('0123456789', 12)}`.replace(/(\d{4})(?=\d)/g, '$1 ') : null,
-        qrisPayload: method.type === 'qris' ? `DUMMY-QRIS-${bookingCode}` : null,
         total: checkout.total,
         deadline: new Date(Date.now() + PAYMENT_WINDOW_MS).toISOString(),
         status: 'pending',
@@ -131,28 +128,10 @@ function renderBill(root, payment, checkout, cart) {
     };
 
     text('[data-booking-code]', payment.bookingCode);
-    text('[data-method-name]', payment.methodName);
     text('[data-payment-total]', formatRupiah(payment.total));
+    root.querySelector('[data-amount-copy]').dataset.copy = String(payment.total);
     text('[data-contact-name]', checkout.contact.name);
     text('[data-contact-detail]', `${checkout.contact.email}, ${checkout.contact.phone}`);
-
-    const vaPanel = root.querySelector('[data-va-panel]');
-    vaPanel.hidden = payment.type !== 'va';
-    if (payment.vaNumber) {
-        text('[data-va-number]', payment.vaNumber);
-        root.querySelector('[data-va-copy]').dataset.copy = payment.vaNumber.replace(/\s/g, '');
-    }
-
-    const qrisPanel = root.querySelector('[data-qris-panel]');
-    qrisPanel.hidden = payment.type !== 'qris';
-    if (payment.qrisPayload) {
-        text('[data-qris-payload]', payment.qrisPayload);
-        drawQrisPlaceholder(root.querySelector('[data-qris-art]'), payment.qrisPayload);
-    }
-
-    root.querySelectorAll('[data-instruction]').forEach((panel) => {
-        panel.hidden = panel.dataset.instruction !== payment.methodId;
-    });
 
     // Biaya layanan mengikuti snapshot checkout.
     root.querySelector('[data-summary-fee]').dataset.fee = String(checkout.serviceFee ?? 0);
@@ -164,7 +143,8 @@ function renderBill(root, payment, checkout, cart) {
 function renderExpired(root, isExpired) {
     root.querySelector('[data-countdown]').hidden = isExpired;
     root.querySelector('[data-payment-expired]').hidden = !isExpired;
-    root.querySelector('[data-pay-confirm]').disabled = isExpired;
+    // Tagihan kedaluwarsa: bukti tidak bisa dikirim sampai tagihan dibuat ulang.
+    root.querySelector('[data-proof-panel]').hidden = isExpired;
 }
 
 function startCountdown(root, payment, onExpire) {
@@ -199,28 +179,8 @@ function startCountdown(root, payment, onExpire) {
     return timer;
 }
 
-/** Pola kotak deterministik dari payload; hanya dekorasi. */
-function drawQrisPlaceholder(container, payload) {
-    let seed = [...payload].reduce((hash, char) => (hash * 31 + char.charCodeAt(0)) >>> 0, 7);
-    const cells = Array.from({ length: 64 }, () => {
-        seed = (seed * 1103515245 + 12345) >>> 0;
-        const cell = document.createElement('span');
-        cell.className = (seed >>> 16) % 2 === 0 ? 'rounded-[2px] bg-ink' : 'rounded-[2px] bg-transparent';
-        return cell;
-    });
-    container.replaceChildren(...cells);
-}
-
 function randomString(alphabet, length) {
     const bytes = crypto.getRandomValues(new Uint32Array(length));
 
     return [...bytes].map((byte) => alphabet[byte % alphabet.length]).join('');
-}
-
-function readJson(root, selector) {
-    try {
-        return JSON.parse(root.querySelector(selector)?.textContent ?? 'null');
-    } catch {
-        return null;
-    }
 }

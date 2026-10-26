@@ -1,4 +1,6 @@
 import './bootstrap';
+// Alpine is bundled by Livewire; register Alpine.data() here before Livewire.start().
+import { Livewire, Alpine } from '../../vendor/livewire/livewire/dist/livewire.esm';
 import { initAccountForms } from './modules/account-forms';
 import { initAccountNav } from './modules/account-nav';
 import { initAddToCart } from './modules/add-to-cart';
@@ -14,7 +16,9 @@ import { initClipboard } from './modules/clipboard';
 import { initNav } from './modules/nav';
 import { initOrderCheck } from './modules/order-check';
 import { initPayment } from './modules/payment';
+import { paymentProofUpload } from './modules/payment-proof-upload';
 import { initProductBuy } from './modules/product-buy';
+import { initProductViewer } from './modules/product-viewer';
 import { initSearchFilter } from './modules/search-filter';
 import { initSearchForm } from './modules/search-form';
 import { initSeatPicker } from './modules/seat-picker';
@@ -41,6 +45,7 @@ const MODULES = {
     'order-success': initOrderSuccess,
     'account-forms': initAccountForms,
     'product-buy': initProductBuy,
+    'product-viewer': initProductViewer,
 };
 
 document.querySelectorAll('[data-module]').forEach((element) => {
@@ -49,3 +54,8 @@ document.querySelectorAll('[data-module]').forEach((element) => {
 
 initClipboard();
 initModals();
+
+Alpine.data('paymentProofUpload', paymentProofUpload);
+
+// Started after vanilla modules so a Livewire error cannot block them.
+Livewire.start();
