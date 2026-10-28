@@ -79,10 +79,7 @@
             </div>
         @else
             <div>
-                    <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
-                        <p class="text-sm text-ink-muted" aria-live="polite">
-                            <span class="font-semibold text-ink" data-filter-count>{{ count($trips) }}</span> jadwal ditemukan
-                        </p>
+                    <div class="mb-4 flex flex-wrap items-center justify-end gap-3">
                         <div class="flex flex-wrap items-center gap-2">
                             {{-- Tanggal opsional: reload dengan ?date=, filter lain ikut via hidden input --}}
                             <form action="{{ route('catalog.index') }}" method="get" class="flex items-center gap-2">
@@ -97,12 +94,6 @@
                                 <button type="submit" class="btn-outline">Terapkan</button>
                             </form>
                             <label for="urutkan" class="sr-only">Urutkan</label>
-                            <select id="urutkan" class="form-input w-auto appearance-none pr-8" data-filter-sort>
-                                <option value="depart">Berangkat paling awal</option>
-                                <option value="price">Harga terendah</option>
-                                <option value="duration">Durasi tercepat</option>
-                                <option value="rating">Rating tertinggi</option>
-                            </select>
                         </div>
                     </div>
 

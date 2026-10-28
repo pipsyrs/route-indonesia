@@ -14,7 +14,7 @@
     </section>
 
     {{-- Rute populer: daftar dua kolom, bukan kartu seragam --}}
-    <section class="container-page py-8 md:py-10" aria-labelledby="rute-title">
+    <section class="container-page py-15" aria-labelledby="rute-title">
         <h2 id="rute-title" class="text-2xl font-bold tracking-tight text-ink md:text-3xl">{{ __('Popular routes this week') }}</h2>
         <p class="mt-2 max-w-[60ch] text-ink-muted">{{ __("Jump straight to schedules for tomorrow's departures.") }}</p>
 
@@ -39,7 +39,7 @@
     </section>
 
     {{-- Katalog produk: kolom dipisah garis tipis, ala katalog furnitur --}}
-    <section class="container-page py-8 md:py-10" aria-labelledby="produk-title">
+    <section class="container-page" aria-labelledby="produk-title">
         <div class="flex flex-wrap items-end justify-between gap-4">
             <div>
                 <h2 id="produk-title" class="text-2xl font-semibold tracking-tight text-ink md:text-3xl">{{ __('Product catalog') }}</h2>
@@ -58,24 +58,6 @@
         </ul>
     </section>
 
-    {{-- Girls Trip: banner foto full-width sebagai ajakan ke halaman Trip --}}
-    <section class="container-page py-8 md:py-10" aria-labelledby="girls-trip-title">
-        <div class="relative isolate overflow-hidden rounded-lg">
-            <img src="https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=1600&q=80&auto=format&fit=crop"
-                 alt="{{ __('Four friends embracing on a hilltop at sunset') }}" loading="lazy" width="1600" height="1067"
-                 class="absolute inset-0 -z-10 size-full object-cover">
-            <div class="absolute inset-0 -z-10 bg-gradient-to-t from-brand-950/85 via-brand-950/50 to-brand-950/10 md:bg-gradient-to-r md:from-brand-950/70 md:via-brand-950/40" aria-hidden="true"></div>
-            <div class="flex min-h-72 max-w-xl flex-col justify-end px-6 py-8 sm:min-h-96 sm:px-10 sm:py-12">
-                <h2 id="girls-trip-title" class="text-4xl font-semibold tracking-tight text-white md:text-5xl">{{ __('Girls Trip') }}</h2>
-                <p class="mt-3 text-base text-brand-50 md:text-lg">{{ __('Plan a getaway with your best friends, seats side by side.') }}</p>
-                <a href="{{ route('trip') }}" class="btn mt-6 w-fit bg-white text-brand-800 hover:bg-brand-50">
-                    {{ __('Plan the trip') }}
-                    <x-icon name="arrow-right" class="size-4" />
-                </a>
-            </div>
-        </div>
-    </section>
-
     {{-- Komunitas Behind The Route: semua konten di tengah, wordmark hitam di atas latar terang --}}
     @php
         $communityUrl = config('services.community_url');
@@ -84,7 +66,8 @@
         <div class="flex flex-col items-center text-center">
             <img src="{{ asset('images/btr.png') }}" alt="Behind The Route" style="width: 50%; height: auto; display: block; text-align: center; align-items: center; justify-content: center;" loading="lazy"
                      class="h-auto w-[20rem] max-w-full md:w-[28rem]">
-            <p class="mx-auto mt-6 max-w-prose font-light text-ink-muted">{{ __('Join Behind The Route, a community of travelers sharing stories, tips, and trips across Indonesia.') }}</p>
+            <p class="mt-6 text-ink mx-3">{{ __('Welcome to the community Behind The Route!') }}</p>
+            <p class="mt-6 text-ink mx-3">{{ __('Saling belajar, berbagi hal-hal positif, dan berkembang bersama lewat kegiatan yang bermanfaat seperti hiking, naik gunung dan olahraga.') }}</p>
             <a href="{{ $communityUrl ?: route('collaboration') }}"
                @if ($communityUrl) target="_blank" rel="noopener noreferrer" @endif
                class="btn mt-7 rounded-full border border-line-strong text-ink transition-colors duration-200 hover:border-brand-600 hover:bg-brand-600 hover:text-white">
@@ -94,6 +77,20 @@
                 @endif
                 <x-icon name="arrow-right" class="size-4" />
             </a>
+        </div>
+    </section>
+
+    {{-- Girls Trip: banner foto full-width sebagai ajakan ke halaman Trip --}}
+    <section class="container-page py-6" aria-labelledby="girls-trip-title">
+        <div class="relative isolate overflow-hidden rounded-lg">
+            <img src="https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=1600&q=80&auto=format&fit=crop"
+                 alt="{{ __('Four friends embracing on a hilltop at sunset') }}" loading="lazy" width="1600" height="1067"
+                 class="absolute inset-0 -z-10 size-full object-cover">
+            <div class="absolute inset-0 -z-10 bg-gradient-to-t from-brand-950/85 via-brand-950/50 to-brand-950/10 md:bg-gradient-to-r md:from-brand-950/70 md:via-brand-950/40" aria-hidden="true"></div>
+            <div class="flex min-h-72 max-w-xl flex-col justify-end px-6 py-8 sm:min-h-96 sm:px-10 sm:py-12">
+                {{-- <h2 id="girls-trip-title" class="text-4xl font-semibold tracking-tight text-white md:text-5xl">{{ __('Girls Trip') }}</h2>
+                <p class="mt-3 text-base text-brand-50 md:text-lg">{{ __('Plan a getaway with your best friends, seats side by side.') }}</p> --}}
+            </div>
         </div>
     </section>
 

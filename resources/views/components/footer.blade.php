@@ -1,4 +1,4 @@
-<footer class="mt-20 border-t border-line bg-surface print:hidden">
+<footer class="mt-3 border-t border-line bg-surface print:hidden">
     <div class="container-page grid gap-10 py-12 md:grid-cols-[1.4fr_1fr_1fr]">
         <div class="max-w-sm">
             <x-logo />

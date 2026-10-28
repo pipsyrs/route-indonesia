@@ -152,9 +152,6 @@
 
                 <div class="min-w-0">
                     <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
-                        <p class="text-sm text-ink-muted" aria-live="polite">
-                            <span class="font-semibold text-ink" data-filter-count>{{ count($trips) }}</span> jadwal ditemukan
-                        </p>
                         <div class="flex items-center gap-2">
                             <button type="button" class="btn-outline lg:hidden" data-filter-open aria-controls="panel-filter">
                                 <x-icon name="adjustments-horizontal" class="size-4" />

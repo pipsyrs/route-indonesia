@@ -11,10 +11,10 @@
                 <x-icon name="shopping-cart" class="absolute inset-0 m-auto size-8 text-line-strong" />
             @endif
         </div>
-        @if (! empty($product['brand']))
+        {{-- @if (! empty($product['brand']))
             <p class="mt-4 text-xs text-ink-subtle">{{ $product['brand'] }}</p>
-        @endif
-        <div @class(['flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5', 'mt-1' => ! empty($product['brand']), 'mt-4' => empty($product['brand'])])>
+        @endif --}}
+        <div @class(['flex flex-columns items-baseline justify-between gap-x-3 gap-y-0.5', 'mt-1' => ! empty($product['brand']), 'mt-4' => empty($product['brand'])])>
             <h3 class="font-medium text-ink group-hover:text-brand-ink">{{ $product['name'] }}</h3>
             <x-price :amount="$product['price']" class="shrink-0 text-sm text-ink tabular-nums" />
         </div>
