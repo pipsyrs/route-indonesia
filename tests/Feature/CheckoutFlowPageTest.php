@@ -18,7 +18,7 @@ class CheckoutFlowPageTest extends TestCase
 {
     public function test_it_should_render_cart_shell_with_service_fee(): void
     {
-        $this->get('/keranjang')
+        $this->get('/cart')
             ->assertOk()
             ->assertViewIs('pages.cart')
             ->assertViewHas('serviceFee', DummyShop::SERVICE_FEE)
@@ -50,22 +50,21 @@ class CheckoutFlowPageTest extends TestCase
             ->assertSee('data-field="address_city" data-rule="place"', false)
             ->assertSee('data-field="address_district" data-rule="place"', false)
             ->assertSee('data-field="address_postal" data-rule="postal"', false)
-            ->assertSee('data-field="referral_source" data-rule="option"', false)
+            ->assertSee('data-field="referral_source" data-rule="required"', false)
             ->assertSee('data-field="instagram" data-rule="instagram"', false)
             ->assertSee('data-field="referral_code" data-rule="referral"', false)
             ->assertSee('<option value="Jawa Barat">Jawa Barat</option>', false)
             ->assertSee('data-seat-error hidden', false)
             ->assertSee('data-seat-error-message', false)
             ->assertSee('data-checkout-submit', false)
-            ->assertSee('name="method" value="bank_transfer"', false)
+            ->assertDontSee('name="method"', false)
+            ->assertDontSee('metode-title', false)
+            ->assertSee('class="form-label">Username Instagram</label>', false)
             ->assertDontSee('data-passenger-groups', false)
             ->assertDontSee('data-passenger-group-template', false)
             ->assertDontSee('data-same-as-contact', false)
             ->getContent();
 
-        foreach (['instagram', 'tiktok', 'friend', 'google', 'other'] as $source) {
-            $this->assertStringContainsString("<option value=\"{$source}\">", $html);
-        }
         // checkout.js memanggil Livewire.find(root.closest('[wire:id]')): root modul = root komponen.
         $this->assertMatchesRegularExpression('/<div[^>]*wire:id="[^"]+"[^>]*data-module="checkout"/', $html);
     }
@@ -101,7 +100,7 @@ class CheckoutFlowPageTest extends TestCase
 
     public function test_it_should_render_cart_seat_modal_and_locked_checkout_hooks(): void
     {
-        $this->get('/keranjang')
+        $this->get('/cart')
             ->assertOk()
             ->assertSee('id="seat-modal"', false)
             ->assertSee('data-seat-modal', false)
@@ -121,7 +120,7 @@ class CheckoutFlowPageTest extends TestCase
 
     public function test_it_should_render_success_item_template_with_seats_instead_of_passenger_names(): void
     {
-        $this->get('/pembayaran/selesai')
+        $this->get('/payment/success')
             ->assertOk()
             ->assertSee('data-seat-line', false)
             ->assertSee('data-field="seats"', false)
@@ -213,7 +212,7 @@ class CheckoutFlowPageTest extends TestCase
     {
         $date = now()->addDays(3)->toDateString();
         $trip = DummyShop::findTrip($tripId);
-        $free = array_values(array_diff(DummyShop::seatCodes(DummyShop::seatLayout($trip['vehicle'])), DummyShop::occupiedSeats($tripId, $date)));
+        $free = array_values(array_diff(DummyShop::seatCodes(DummyShop::seatLayout()), DummyShop::occupiedSeats($tripId, $date)));
 
         return ['key' => "{$tripId}|{$date}", 'tripId' => $tripId, 'date' => $date, 'qty' => $qty, 'seats' => array_slice($free, 0, $qty)];
     }
@@ -226,7 +225,7 @@ class CheckoutFlowPageTest extends TestCase
 
     public function test_it_should_render_payment_as_livewire_page_with_bank_accounts(): void
     {
-        $this->get('/pembayaran')
+        $this->get('/payment')
             ->assertOk()
             ->assertSeeLivewire(Payment::class)
             ->assertSee('<title>Pembayaran | ', false);
@@ -238,7 +237,7 @@ class CheckoutFlowPageTest extends TestCase
 
     public function test_it_should_render_success_as_livewire_page(): void
     {
-        $this->get('/pembayaran/selesai')
+        $this->get('/payment/success')
             ->assertOk()
             ->assertSeeLivewire(PaymentSuccess::class)
             ->assertSee('<title>Bukti pembayaran terkirim | ', false);
@@ -248,7 +247,7 @@ class CheckoutFlowPageTest extends TestCase
 
     public function test_it_should_ignore_query_string_on_client_rendered_pages(): void
     {
-        foreach (['/keranjang', '/checkout', '/pembayaran', '/pembayaran/selesai'] as $path) {
+        foreach (['/cart', '/checkout', '/payment', '/payment/success'] as $path) {
             $this->get("{$path}?total=1&method[]=x&code=<script>")
                 ->assertOk()
                 ->assertDontSee('<script>alert', false)
@@ -258,14 +257,14 @@ class CheckoutFlowPageTest extends TestCase
 
     public function test_it_should_reject_post_on_display_only_pages(): void
     {
-        foreach (['/keranjang', '/checkout', '/pembayaran', '/masuk', '/daftar', '/akun/profil'] as $path) {
+        foreach (['/cart', '/checkout', '/payment', '/login', '/register', '/account/profile'] as $path) {
             $this->post($path)->assertStatus(405);
         }
     }
 
     public function test_it_should_show_cart_badge_and_guest_link_in_navbar(): void
     {
-        $this->get('/katalog')
+        $this->get('/catalog')
             ->assertSee('data-module="cart-badge"', false)
             ->assertSee('data-module="account-nav"', false)
             ->assertSee('href="'.route('cart').'"', false)

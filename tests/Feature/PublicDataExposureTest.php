@@ -19,10 +19,10 @@ class PublicDataExposureTest extends TestCase
 
     public function test_it_should_not_expose_seeded_booking_pii_when_rendering_public_pages(): void
     {
-        // Halaman /akun* sengaja menampilkan user dummy (DummyShop::user), jadi tidak dicek di sini.
+        // Halaman /account* sengaja menampilkan user dummy (DummyShop::user), jadi tidak dicek di sini.
         $pages = [
-            '/', '/katalog?from=Jakarta&to=Bandung&date='.$this->tomorrow(), '/katalog/1',
-            '/keranjang', '/checkout', '/pembayaran', '/pembayaran/selesai', '/masuk', '/daftar', '/cek-pesanan',
+            '/', '/catalog?from=Jakarta&to=Bandung&date='.$this->tomorrow(), '/catalog/1',
+            '/cart', '/checkout', '/payment', '/payment/success', '/login', '/register', '/check-order',
         ];
 
         foreach ($pages as $page) {

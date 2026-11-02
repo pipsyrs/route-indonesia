@@ -11,7 +11,7 @@ class CatalogPageTest extends TestCase
 {
     public function test_it_should_list_all_dummy_trips_when_no_filter_is_given(): void
     {
-        $this->get('/katalog')
+        $this->get('/catalog')
             ->assertOk()
             ->assertViewIs('pages.catalog.index')
             ->assertViewHas('trips', fn (array $trips) => count($trips) === count(DummyShop::trips()))
@@ -29,7 +29,7 @@ class CatalogPageTest extends TestCase
     #[DataProvider('keywordSearches')]
     public function test_it_should_filter_trips_by_keyword_case_insensitively(string $keyword, array $ids): void
     {
-        $this->get('/katalog?q='.urlencode($keyword))
+        $this->get('/catalog?q='.urlencode($keyword))
             ->assertOk()
             ->assertViewHas('query', fn (array $query) => $query['q'] === trim($keyword))
             ->assertViewHas('trips', fn (array $trips) => array_column($trips, 'id') === $ids)
@@ -49,7 +49,7 @@ class CatalogPageTest extends TestCase
 
     public function test_it_should_show_empty_state_when_keyword_has_no_match(): void
     {
-        $this->get('/katalog?q=zzz')
+        $this->get('/catalog?q=zzz')
             ->assertOk()
             ->assertViewHas('trips', [])
             ->assertSee('Belum ada jadwal untuk pencarian ini')
@@ -58,7 +58,7 @@ class CatalogPageTest extends TestCase
 
     public function test_it_should_escape_keyword_in_title_heading_and_inputs(): void
     {
-        $this->get('/katalog?'.http_build_query(['q' => '"><script>alert(1)</script>', 'date' => $this->tomorrow()]))
+        $this->get('/catalog?'.http_build_query(['q' => '"><script>alert(1)</script>', 'date' => $this->tomorrow()]))
             ->assertOk()
             ->assertDontSee('<script>alert(1)</script>', false)
             ->assertSee('&quot;&gt;&lt;script&gt;alert(1)&lt;/script&gt;', false);
@@ -66,29 +66,29 @@ class CatalogPageTest extends TestCase
 
     public function test_it_should_ignore_array_keyword_and_cap_its_length(): void
     {
-        $this->get('/katalog?q[]=bandung')
+        $this->get('/catalog?q[]=bandung')
             ->assertOk()
             ->assertViewHas('trips', fn (array $trips) => count($trips) === count(DummyShop::trips()));
 
-        $this->get('/katalog?q='.str_repeat('a', 150))
+        $this->get('/catalog?q='.str_repeat('a', 150))
             ->assertOk()
             ->assertViewHas('query', fn (array $query) => mb_strlen($query['q']) === 100);
     }
 
     public function test_it_should_filter_named_route_and_return_not_found_for_unknown_slug(): void
     {
-        $this->get('/katalog?route=bromo')
+        $this->get('/catalog?route=bromo')
             ->assertOk()
             ->assertViewHas('trips', fn (array $trips) => array_column($trips, 'id') === [8, 9]);
 
-        $this->get('/katalog?route=atlantis')->assertNotFound();
+        $this->get('/catalog?route=atlantis')->assertNotFound();
     }
 
     public function test_it_should_pass_selected_date_to_header_and_trip_links(): void
     {
         $date = now()->addDay()->toDateString();
 
-        $this->get("/katalog?q=bandung&date={$date}")
+        $this->get("/catalog?q=bandung&date={$date}")
             ->assertOk()
             ->assertSee('Berangkat '.now()->addDay()->locale('id')->translatedFormat('l, j F Y'))
             ->assertSee(route('catalog.show', ['id' => 1, 'date' => $date]), false)
@@ -97,7 +97,7 @@ class CatalogPageTest extends TestCase
 
     public function test_it_should_filter_by_origin_and_destination_case_insensitively(): void
     {
-        $this->get('/katalog?from=jakarta&to=BANDUNG')
+        $this->get('/catalog?from=jakarta&to=BANDUNG')
             ->assertOk()
             ->assertViewHas('query', fn (array $query) => $query['from'] === 'Jakarta' && $query['to'] === 'Bandung')
             ->assertViewHas('trips', fn (array $trips) => array_column($trips, 'id') === [1, 2, 3]);
@@ -105,13 +105,13 @@ class CatalogPageTest extends TestCase
 
     public function test_it_should_filter_by_origin_only(): void
     {
-        $this->get('/katalog?from=Yogyakarta')
+        $this->get('/catalog?from=Yogyakarta')
             ->assertViewHas('trips', fn (array $trips) => array_column($trips, 'id') === [6, 10]);
     }
 
     public function test_it_should_show_empty_state_when_route_has_no_trip(): void
     {
-        $this->get('/katalog?from=Malang&to=Jakarta')
+        $this->get('/catalog?from=Malang&to=Jakarta')
             ->assertOk()
             ->assertViewHas('trips', [])
             ->assertSee('Belum ada jadwal untuk pencarian ini');
@@ -119,7 +119,7 @@ class CatalogPageTest extends TestCase
 
     public function test_it_should_show_error_when_origin_equals_destination(): void
     {
-        $this->get('/katalog?from=Bandung&to=bandung')
+        $this->get('/catalog?from=Bandung&to=bandung')
             ->assertOk()
             ->assertViewHas('trips', [])
             ->assertViewHas('searchError', 'Kota asal dan tujuan tidak boleh sama.')
@@ -128,7 +128,7 @@ class CatalogPageTest extends TestCase
 
     public function test_it_should_ignore_unknown_city(): void
     {
-        $this->get('/katalog?from=Atlantis&to=Bandung')
+        $this->get('/catalog?from=Atlantis&to=Bandung')
             ->assertViewHas('query', fn (array $query) => $query['from'] === null && $query['to'] === 'Bandung')
             ->assertViewHas('trips', fn (array $trips) => array_column($trips, 'id') === [1, 2, 3]);
     }
@@ -137,13 +137,13 @@ class CatalogPageTest extends TestCase
     {
         $date = now()->addDays(5)->toDateString();
 
-        $this->get("/katalog?date={$date}")->assertViewHas('query', fn (array $query) => $query['date'] === $date);
+        $this->get("/catalog?date={$date}")->assertViewHas('query', fn (array $query) => $query['date'] === $date);
     }
 
     #[DataProvider('invalidDates')]
     public function test_it_should_drop_date_when_it_is_invalid(string $date): void
     {
-        $this->get("/katalog?{$date}")->assertOk()->assertViewHas('query', fn (array $query) => $query['date'] === null);
+        $this->get("/catalog?{$date}")->assertOk()->assertViewHas('query', fn (array $query) => $query['date'] === null);
     }
 
     /** @return array<string, array{0: string}> */
@@ -162,7 +162,7 @@ class CatalogPageTest extends TestCase
     {
         $date = now()->addDays(3)->toDateString();
 
-        $response = $this->get("/katalog/1?date={$date}");
+        $response = $this->get("/catalog/1?date={$date}");
 
         $response->assertOk()
             ->assertViewIs('pages.catalog.show')
@@ -184,12 +184,12 @@ class CatalogPageTest extends TestCase
         $this->assertSame($seatMap['layout'], $snapshot['seatLayout']);
         $this->assertSame($seatMap['occupied'], $snapshot['occupied']);
         $this->assertSame(7, count(DummyShop::seatCodes($snapshot['seatLayout'])) - count($snapshot['occupied']));
-        $this->assertSame($snapshot['occupied'], $this->tripJson($this->get("/katalog/1?date={$date}")->getContent())['occupied']);
+        $this->assertSame($snapshot['occupied'], $this->tripJson($this->get("/catalog/1?date={$date}")->getContent())['occupied']);
     }
 
     public function test_it_should_render_inline_seat_map_instead_of_qty_input_on_trip_detail(): void
     {
-        $this->get('/katalog/1')
+        $this->get('/catalog/1')
             ->assertOk()
             ->assertSee('data-seat-grid', false)
             ->assertSee('data-seat-cell-template', false)
@@ -204,18 +204,18 @@ class CatalogPageTest extends TestCase
 
     public function test_it_should_limit_quantity_to_seats_left_when_fewer_than_max(): void
     {
-        $this->get('/katalog/9')->assertOk()->assertViewHas('maxQty', 2);
+        $this->get('/catalog/9')->assertOk()->assertViewHas('maxQty', 2);
     }
 
     public function test_it_should_default_detail_date_to_tomorrow_when_date_is_past(): void
     {
-        $this->get('/katalog/1?date=2000-01-01')->assertViewHas('date', $this->tomorrow());
+        $this->get('/catalog/1?date=2000-01-01')->assertViewHas('date', $this->tomorrow());
     }
 
     #[DataProvider('missingTripIds')]
     public function test_it_should_return_not_found_when_trip_does_not_exist(string $id): void
     {
-        $this->get("/katalog/{$id}")->assertNotFound();
+        $this->get("/catalog/{$id}")->assertNotFound();
     }
 
     /** @return array<string, array{0: string}> */
@@ -233,7 +233,7 @@ class CatalogPageTest extends TestCase
 
     public function test_it_should_escape_script_closing_tag_in_trip_json(): void
     {
-        $content = $this->get('/katalog/1')->getContent();
+        $content = $this->get('/catalog/1')->getContent();
         $json = $this->rawTripJson($content);
 
         $this->assertStringNotContainsString('</', $json);
@@ -255,5 +255,15 @@ class CatalogPageTest extends TestCase
     private function tomorrow(): string
     {
         return now()->addDay()->toDateString();
+    }
+
+    public function test_it_should_hide_vehicle_but_show_city_labels_on_trip_cards(): void
+    {
+        $this->get('/catalog')
+            ->assertOk()
+            ->assertSee('Cipaganti')
+            ->assertDontSee('Hiace Premio')
+            ->assertSee('<p class="text-xs text-ink-subtle">Jakarta</p>', false)
+            ->assertSee('<p class="text-xs text-ink-subtle">Bandung</p>', false);
     }
 }

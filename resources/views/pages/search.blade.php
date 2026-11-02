@@ -131,18 +131,6 @@
                             </div>
                         </fieldset>
 
-                        <fieldset>
-                            <legend class="text-sm font-semibold text-ink">Fasilitas</legend>
-                            <div class="mt-3 space-y-2">
-                                @foreach ($facilities as $code => $label)
-                                    <label class="flex cursor-pointer items-center gap-2.5 text-sm text-ink">
-                                        <input type="checkbox" name="facility" value="{{ $code }}" class="size-4 rounded accent-brand-600">
-                                        {{ $label }}
-                                    </label>
-                                @endforeach
-                            </div>
-                        </fieldset>
-
                         <div class="flex gap-2">
                             <button type="reset" class="btn-outline flex-1" data-filter-reset>Reset</button>
                             <button type="button" class="btn-primary flex-1 lg:hidden" data-filter-close>Terapkan</button>
@@ -169,7 +157,7 @@
 
                     <div class="grid gap-4" data-filter-list>
                         @foreach ($trips as $trip)
-                            <x-trip-card :trip="$trip" :query="$query" :facilities="$facilities" />
+                            <x-trip-card :trip="$trip" :query="$query" />
                         @endforeach
                     </div>
 

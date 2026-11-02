@@ -14,24 +14,25 @@ class PublicRouteSmokeTest extends TestCase
     {
         return [
             'home' => ['/'],
-            'cek pesanan' => ['/cek-pesanan'],
+            'cek pesanan' => ['/check-order'],
             'shop' => ['/shop'],
             'shop show' => ['/shop/cabin-suitcase'],
             'trip' => ['/trip'],
-            'kolaborasi' => ['/kolaborasi'],
-            'karir' => ['/karir'],
-            'katalog' => ['/katalog'],
-            'katalog show' => ['/katalog/1'],
-            'keranjang' => ['/keranjang'],
+            'community' => ['/community'],
+            'collaborations' => ['/collaborations'],
+            'careers' => ['/careers'],
+            'katalog' => ['/catalog'],
+            'katalog show' => ['/catalog/1'],
+            'keranjang' => ['/cart'],
             'checkout' => ['/checkout'],
-            'pembayaran' => ['/pembayaran'],
-            'pembayaran selesai' => ['/pembayaran/selesai'],
-            'masuk' => ['/masuk'],
-            'daftar' => ['/daftar'],
-            'akun' => ['/akun'],
-            'akun pesanan' => ['/akun/pesanan'],
-            'akun alamat' => ['/akun/alamat'],
-            'akun profil' => ['/akun/profil'],
+            'pembayaran' => ['/payment'],
+            'pembayaran selesai' => ['/payment/success'],
+            'masuk' => ['/login'],
+            'daftar' => ['/register'],
+            'akun' => ['/account'],
+            'akun pesanan' => ['/account/orders'],
+            'akun alamat' => ['/account/addresses'],
+            'akun profil' => ['/account/profile'],
         ];
     }
 
@@ -72,7 +73,7 @@ class PublicRouteSmokeTest extends TestCase
             ->assertSee('data-next-url="'.route('payment').'"', false)
             ->assertSee('data-checkout-form wire:ignore', false);
 
-        $this->get('/pembayaran')->assertOk()
+        $this->get('/payment')->assertOk()
             ->assertSee('data-module="checkout-payment"', false)
             ->assertSee('data-back-url="'.route('checkout').'"', false)
             ->assertSee('data-success-url="'.route('payment.success').'"', false)
@@ -80,7 +81,7 @@ class PublicRouteSmokeTest extends TestCase
             ->assertSee('data-proof-panel wire:ignore.self', false)
             ->assertSee('wire:submit="submit"', false);
 
-        $this->get('/pembayaran/selesai')->assertOk()
+        $this->get('/payment/success')->assertOk()
             ->assertSee('data-module="order-success"', false)
             ->assertSee('data-empty-url="'.route('cart').'" wire:ignore', false);
     }

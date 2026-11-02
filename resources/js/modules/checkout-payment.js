@@ -1,4 +1,4 @@
-import { CART_KEY, CHECKOUT_KEY, LAST_ORDER_KEY, PAYMENT_KEY, allSeatsComplete, cartSignature, cartTotals, clearCart, getCart } from './cart';
+import { CART_KEY, CHECKOUT_KEY, LAST_ORDER_KEY, PAYMENT_KEY, allSeatsComplete, cartSignature, cartTotals, clearCart, getCart, orderCodeLabel } from './cart';
 import { renderCartSummary } from './cart-summary';
 import { formatRupiah } from './utils/format';
 import { readLocal, removeLocal, writeLocal } from './utils/storage';
@@ -125,6 +125,7 @@ function renderBill(root, payment, checkout, cart) {
         root.querySelector(selector).textContent = value;
     };
 
+    text('[data-booking-code-label]', orderCodeLabel(cart.items));
     text('[data-booking-code]', payment.bookingCode);
     text('[data-payment-total]', formatRupiah(payment.total));
     root.querySelector('[data-amount-copy]').dataset.copy = String(payment.total);

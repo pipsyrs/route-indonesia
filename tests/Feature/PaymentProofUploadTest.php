@@ -191,7 +191,7 @@ class PaymentProofUploadTest extends TestCase
 
     public function test_it_should_render_guest_register_modal_on_success_page_outside_morphing(): void
     {
-        $this->get('/pembayaran/selesai')
+        $this->get('/payment/success')
             ->assertOk()
             ->assertSee('id="success-guest-modal"', false)
             ->assertSee('Untuk melacak data pemesanan, buat akun terlebih dahulu.')
@@ -199,10 +199,10 @@ class PaymentProofUploadTest extends TestCase
             ->assertSee('Buat akun')
             ->assertSee('Nanti saja');
 
-        $html = $this->get('/pembayaran/selesai')->getContent();
+        $html = $this->get('/payment/success')->getContent();
         $this->assertMatchesRegularExpression('/<dialog id="success-guest-modal"[^>]*wire:ignore/', $html);
 
-        $this->get('/pembayaran')
+        $this->get('/payment')
             ->assertOk()
             ->assertDontSee('guest-modal', false);
     }

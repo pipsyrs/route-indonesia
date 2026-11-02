@@ -1,0 +1,43 @@
+x-app-build: &app-build
+  context: .
+  dockerfile: docker/php/Dockerfile
+  target: dev
+  args:
+    HOST_UID: ${HOST_UID:-1000}
+    HOST_GID: ${HOST_GID:-1000}
+
+services:
+  app:
+    build: *app-build
+    image: routeindonesia-app
+    environment:
+      CONTAINER_ROLE: app
+      RUN_MIGRATIONS: "true"
+      # DB runs on the host; overrides DB_HOST=127.0.0.1 from .env
+      DB_HOST: ${DOCKER_DB_HOST:-host.docker.internal}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - .:/var/www/html
+    healthcheck:
+      test: ["CMD-SHELL", "test -f /tmp/app-ready"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+      start_period: 120s
+
+  nginx:
+    image: nginx:1.27-alpine
+    ports:
+      - "127.0.0.1:8000:80"
+    volumes:
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./public:/var/www/html/public:ro
+      - ./storage/app:/srv/storage:ro
+    depends_on:
+      app:
+        condition: service_healthy
+
+volumes:
+  app-storage:
+  app-logs:

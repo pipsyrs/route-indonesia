@@ -67,21 +67,18 @@ function readCriteria(form, priceInput) {
     return {
         timeSlots: checked('time'),
         operators: checked('operator'),
-        facilities: checked('facility'),
         maxPrice: Number(priceInput.value),
     };
 }
 
 function matchesCriteria(card, criteria) {
     const hour = Number(card.dataset.depart.split(':')[0]);
-    const facilities = card.dataset.facilities.split(',');
 
     const matchesTime = criteria.timeSlots.length === 0
         || criteria.timeSlots.some((slot) => hour >= TIME_SLOTS[slot][0] && hour < TIME_SLOTS[slot][1]);
     const matchesOperator = criteria.operators.length === 0 || criteria.operators.includes(card.dataset.operator);
-    const matchesFacilities = criteria.facilities.every((code) => facilities.includes(code));
 
-    return matchesTime && matchesOperator && matchesFacilities && Number(card.dataset.price) <= criteria.maxPrice;
+    return matchesTime && matchesOperator && Number(card.dataset.price) <= criteria.maxPrice;
 }
 
 function initFilterDrawer(root) {

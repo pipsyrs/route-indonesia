@@ -17,7 +17,7 @@ class TripPresenter
     /** Relasi yang wajib di-eager-load sebelum memanggil presentTrip(). */
     public const SCHEDULE_RELATIONS = [
         'vehicle.operator',
-        'vehicle.vehicleType.facilities',
+        'vehicle.vehicleType',
         'route.origin',
         'route.destination',
         'stops.location',
@@ -57,8 +57,12 @@ class TripPresenter
             'duration' => intdiv($minutes, 60).'j '.($minutes % 60).'m',
             'price' => $schedule->price,
             'seats_left' => $schedule->seats_left,
-            'facilities' => $vehicle->vehicleType->facilities->pluck('code')->all(),
             'rating' => $vehicle->operator->rating_average,
+            // Belum ada kolom di DB; default aman untuk view.
+            'type' => 'open',
+            'route_name' => null,
+            'description' => null,
+            'itinerary' => [],
             'occupied' => $occupied,
             'pickups' => self::presentStops($schedule, ScheduleStop::TYPE_PICKUP),
             'dropoffs' => self::presentStops($schedule, ScheduleStop::TYPE_DROPOFF),

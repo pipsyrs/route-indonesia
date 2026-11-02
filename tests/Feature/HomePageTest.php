@@ -44,7 +44,7 @@ class HomePageTest extends TestCase
 
     public function test_it_should_render_check_order_page(): void
     {
-        $this->get('/cek-pesanan')->assertOk()->assertViewIs('pages.cek-pesanan');
+        $this->get('/check-order')->assertOk()->assertViewIs('pages.cek-pesanan');
     }
 
     public function test_it_should_list_dummy_popular_routes_with_min_price_when_visiting_home(): void
@@ -64,7 +64,7 @@ class HomePageTest extends TestCase
         });
 
         foreach (['papandayan', 'bromo', 'prambanan', 'karimunjawa'] as $slug) {
-            $response->assertSee('/katalog?route='.$slug.'&amp;date='.$this->tomorrow(), false);
+            $response->assertSee('/catalog?route='.$slug.'&amp;date='.$this->tomorrow(), false);
         }
     }
 

@@ -13,12 +13,12 @@ class AccountPageTest extends TestCase
     public static function accountPages(): array
     {
         return [
-            'masuk' => ['/masuk', 'pages.account.login'],
-            'daftar' => ['/daftar', 'pages.account.register'],
-            'dashboard' => ['/akun', 'pages.account.dashboard'],
-            'pesanan' => ['/akun/pesanan', 'pages.account.orders'],
-            'alamat' => ['/akun/alamat', 'pages.account.addresses'],
-            'profil' => ['/akun/profil', 'pages.account.profile'],
+            'masuk' => ['/login', 'pages.account.login'],
+            'daftar' => ['/register', 'pages.account.register'],
+            'dashboard' => ['/account', 'pages.account.dashboard'],
+            'pesanan' => ['/account/orders', 'pages.account.orders'],
+            'alamat' => ['/account/addresses', 'pages.account.addresses'],
+            'profil' => ['/account/profile', 'pages.account.profile'],
         ];
     }
 
@@ -46,15 +46,15 @@ class AccountPageTest extends TestCase
     {
         $dashboard = 'data-redirect="'.route('account.dashboard').'"';
 
-        $this->get('/masuk')->assertSee('data-form="login"', false)->assertSee($dashboard, false);
-        $this->get('/daftar')->assertSee('data-form="register"', false)->assertSee($dashboard, false);
+        $this->get('/login')->assertSee('data-form="login"', false)->assertSee($dashboard, false);
+        $this->get('/register')->assertSee('data-form="register"', false)->assertSee($dashboard, false);
     }
 
     public function test_it_should_show_three_latest_orders_on_dashboard(): void
     {
         $latest = array_slice(DummyShop::orders(), 0, 3);
 
-        $this->get('/akun')
+        $this->get('/account')
             ->assertViewHas('user', DummyShop::user())
             ->assertViewHas('orders', $latest)
             ->assertSee($latest[0]['code'])
@@ -70,7 +70,7 @@ class AccountPageTest extends TestCase
 
         $this->assertSame($sorted, $dates);
 
-        $response = $this->get('/akun/pesanan')->assertViewHas('orders', $orders);
+        $response = $this->get('/account/orders')->assertViewHas('orders', $orders);
         foreach ($orders as $order) {
             $response->assertSee($order['code']);
         }
@@ -88,7 +88,7 @@ class AccountPageTest extends TestCase
     {
         $user = DummyShop::user();
 
-        $this->get('/akun/profil')
+        $this->get('/account/profile')
             ->assertSee('value="'.e($user['email']).'"', false)
             ->assertSee('data-form="profile"', false)
             ->assertSee('data-form="password"', false);
@@ -96,7 +96,7 @@ class AccountPageTest extends TestCase
 
     public function test_it_should_render_address_book_shell_with_active_sidebar_link(): void
     {
-        $this->get('/akun/alamat')
+        $this->get('/account/addresses')
             ->assertOk()
             ->assertSee('data-module="account-addresses"', false)
             ->assertSee('data-modal-open="address-modal"', false)
@@ -107,7 +107,7 @@ class AccountPageTest extends TestCase
 
     public function test_it_should_render_province_and_district_fields_in_address_form(): void
     {
-        $html = $this->get('/akun/alamat')
+        $html = $this->get('/account/addresses')
             ->assertOk()
             ->assertViewHas('provinces', DummyShop::provinces())
             ->assertSee('data-field="province" data-rule="option"', false)
@@ -121,7 +121,7 @@ class AccountPageTest extends TestCase
 
     public function test_it_should_offer_logout_that_redirects_home(): void
     {
-        $this->get('/akun')
+        $this->get('/account')
             ->assertSee('data-action="logout"', false)
             ->assertSee('data-redirect="'.route('home').'"', false);
     }

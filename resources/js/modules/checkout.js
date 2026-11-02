@@ -112,11 +112,10 @@ export function initCheckout(root) {
             instagram: normalizeInstagram(field('instagram')) || null,
             referralCode: field('referral_code').toUpperCase() || null,
             signature: cartSignature(latest),
-            methodId: form.querySelector('[name="method"]:checked').value,
             ...totals,
             createdAt: new Date().toISOString(),
         });
-        // Metode/total bisa berubah; tagihan lama tidak dipakai lagi.
+        // Total bisa berubah; tagihan lama tidak dipakai lagi.
         removeLocal(PAYMENT_KEY);
         location.assign(form.dataset.nextUrl);
     });
@@ -283,8 +282,4 @@ function restoreSaved(form, saved) {
         const value = read(saved);
         form.querySelector(`[data-field="${name}"]`).value = typeof value === 'string' ? value : '';
     });
-    const method = [...form.querySelectorAll('[name="method"]')].find((input) => input.value === saved.methodId);
-    if (method) {
-        method.checked = true;
-    }
 }

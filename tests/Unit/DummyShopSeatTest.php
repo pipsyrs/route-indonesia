@@ -3,7 +3,6 @@
 namespace Tests\Unit;
 
 use App\Support\DummyShop;
-use Database\Seeders\FleetSeeder;
 use PHPUnit\Framework\TestCase;
 
 class DummyShopSeatTest extends TestCase
@@ -11,31 +10,25 @@ class DummyShopSeatTest extends TestCase
     public function test_it_should_give_every_trip_capacity_above_seats_left(): void
     {
         foreach (DummyShop::trips() as $trip) {
-            $capacity = count(DummyShop::seatCodes(DummyShop::seatLayout($trip['vehicle'])));
+            $capacity = count(DummyShop::seatCodes(DummyShop::seatLayout()));
 
             $this->assertGreaterThanOrEqual($trip['seats_left'] + 1, $capacity, "trip {$trip['id']}");
         }
     }
 
-    public function test_it_should_build_uniform_layouts_with_unique_seat_codes(): void
+    public function test_it_should_use_static_13_seat_layout_with_crew_and_driver(): void
     {
-        foreach (['Hiace Premio' => 10, 'Hiace Commuter' => 14, 'Elf Long' => 18, 'Executive Bus' => 32] as $vehicle => $capacity) {
-            $layout = DummyShop::seatLayout($vehicle);
-            $codes = DummyShop::seatCodes($layout);
+        $layout = DummyShop::seatLayout();
 
-            $this->assertLessThanOrEqual(15, count($layout), $vehicle);
-            $this->assertCount(1, array_unique(array_map('count', $layout)), $vehicle);
-            $this->assertContains(count($layout[0]), [4, 5], $vehicle);
-            $this->assertSame(array_map('strval', range(1, $capacity)), $codes, $vehicle);
-        }
-
-        $this->assertSame(FleetSeeder::SEAT_LAYOUT_14, DummyShop::seatLayout('Hiace Commuter'));
+        $this->assertSame(array_map('strval', range(1, 13)), DummyShop::seatCodes($layout));
+        $this->assertSame(['C', null, null, 'D'], $layout[0]);
+        $this->assertCount(1, array_unique(array_map('count', $layout)));
     }
 
     public function test_it_should_pick_occupied_seats_deterministically(): void
     {
         foreach (DummyShop::trips() as $trip) {
-            $codes = DummyShop::seatCodes(DummyShop::seatLayout($trip['vehicle']));
+            $codes = DummyShop::seatCodes(DummyShop::seatLayout());
             $occupied = DummyShop::occupiedSeats($trip['id'], '2026-12-01');
 
             $this->assertCount(count($codes) - $trip['seats_left'], $occupied, "trip {$trip['id']}");
@@ -57,7 +50,7 @@ class DummyShopSeatTest extends TestCase
         $trip = DummyShop::findTrip(1);
 
         $this->assertSame([
-            'layout' => DummyShop::seatLayout('Hiace Premio'),
+            'layout' => DummyShop::seatLayout(),
             'occupied' => DummyShop::occupiedSeats(1, '2026-12-01'),
         ], DummyShop::seatMap($trip, '2026-12-01'));
     }

@@ -12,7 +12,8 @@
             <ul class="mt-3 space-y-2 text-sm text-ink-muted">
                 <li><a class="hover:text-brand-ink" href="{{ route('shop') }}">{{ __('Shop') }}</a></li>
                 <li><a class="hover:text-brand-ink" href="{{ route('trip') }}">{{ __('Trip') }}</a></li>
-                <li><a class="hover:text-brand-ink" href="{{ route('collaboration') }}">{{ __('Collaboration') }}</a></li>
+                <li><a class="hover:text-brand-ink" href="{{ route('community') }}">{{ __('Community') }}</a></li>
+                <li><a class="hover:text-brand-ink" href="{{ route('collaboration') }}">{{ __('Collaborations') }}</a></li>
                 <li><a class="hover:text-brand-ink" href="{{ route('career') }}">{{ __('Careers') }}</a></li>
             </ul>
         </div>

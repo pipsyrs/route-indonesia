@@ -1,6 +1,6 @@
 const SEAT_PATTERN = /^[0-9]{1,2}$/;
 
-/** Sel denah: 'D' = sopir, null = lorong, string angka = kursi. */
+/** Sel denah: 'C' = crew, 'D' = sopir, null = lorong, string angka = kursi. */
 export const isSeatCode = (cell) => typeof cell === 'string' && SEAT_PATTERN.test(cell);
 
 export const checkedSeats = (grid) => [...grid.querySelectorAll('[data-seat]:checked')].map((input) => input.value);
@@ -8,6 +8,7 @@ export const checkedSeats = (grid) => [...grid.querySelectorAll('[data-seat]:che
 /** Render denah ke grid dari template <x-seat-map-templates>; hanya textContent/atribut. */
 export function renderSeatMap(grid, { layout, occupied, selected = [] }) {
     const templates = {
+        crew: document.querySelector('[data-seat-crew-template]'),
         driver: document.querySelector('[data-seat-driver-template]'),
         aisle: document.querySelector('[data-seat-aisle-template]'),
         seat: document.querySelector('[data-seat-cell-template]'),
@@ -16,6 +17,9 @@ export function renderSeatMap(grid, { layout, occupied, selected = [] }) {
 
     grid.style.gridTemplateColumns = `repeat(${Math.max(...layout.map((row) => row.length))}, minmax(0, 1fr))`;
     grid.replaceChildren(...layout.flat().map((cell) => {
+        if (cell === 'C') {
+            return clone(templates.crew);
+        }
         if (cell === 'D') {
             return clone(templates.driver);
         }

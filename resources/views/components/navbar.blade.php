@@ -3,7 +3,8 @@
         ['label' => __('Home'), 'href' => route('home'), 'active' => request()->routeIs('home')],
         ['label' => __('Shop'), 'href' => route('shop'), 'active' => request()->routeIs('shop')],
         ['label' => __('Trip'), 'href' => route('trip'), 'active' => request()->routeIs('trip')],
-        ['label' => __('Collaboration'), 'href' => route('collaboration'), 'active' => request()->routeIs('collaboration')],
+        ['label' => __('Community'), 'href' => route('community'), 'active' => request()->routeIs('community')],
+        ['label' => __('Collaborations'), 'href' => route('collaboration'), 'active' => request()->routeIs('collaboration')],
         ['label' => __('Careers'), 'href' => route('career'), 'active' => request()->routeIs('career')],
     ];
     $locales = ['en' => 'English', 'id' => 'Bahasa Indonesia'];

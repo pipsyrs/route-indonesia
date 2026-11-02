@@ -34,7 +34,7 @@
 
                 <div class="mx-auto mt-6 inline-flex items-center gap-3 rounded-lg border border-dashed border-line-strong bg-surface px-5 py-3">
                     <span class="text-left">
-                        <span class="block text-xs text-ink-subtle">Kode booking</span>
+                        <span class="block text-xs text-ink-subtle" data-field="code-label">Kode booking</span>
                         <span class="block font-mono text-2xl font-bold tracking-wider text-ink" data-field="code"></span>
                     </span>
                     <button type="button" class="btn-outline px-3 py-1.5 text-xs print:hidden" data-copy="" data-copy-message="Kode booking disalin" data-code-copy>

@@ -24,7 +24,7 @@
                     <a href="{{ route('catalog.index', ['route' => $route['slug'], 'date' => $defaultDate]) }}"
                        class="group flex items-center gap-4 py-5">
                         <span class="grid size-11 shrink-0 place-items-center rounded-md bg-brand-soft text-brand-ink">
-                            <x-icon name="bus" class="size-5" />
+                            <x-icon name="mountains" class="size-5" />
                         </span>
                         <span class="min-w-0 flex-1 font-semibold text-ink">{{ $route['name'] }}</span>
                         <span class="text-right">
@@ -95,15 +95,22 @@
     </section>
 
     {{-- Testimoni: slider 3 review per slide, kontrak data-attribute sama dengan hero --}}
-    @if (count($testimonials) > 0)
-        @php
-            $reviewSlides = array_chunk($testimonials, 3);
-            // Kolom mengikuti jumlah review bila < 3 agar tidak ada ruang kosong.
-            $reviewCols = ['md:grid-cols-1', 'md:grid-cols-2', 'md:grid-cols-3'][min(3, count($testimonials)) - 1];
-        @endphp
         <section class="container-page py-8 md:py-10" aria-labelledby="testimoni-title">
-            <h2 id="testimoni-title" class="text-2xl font-semibold tracking-tight text-ink md:text-3xl">{{ __('What our passengers say') }}</h2>
+            <div class="flex flex-wrap items-center justify-between gap-4">
+                <h2 id="testimoni-title" class="text-2xl font-semibold tracking-tight text-ink md:text-3xl">{{ __('What our passengers say') }}</h2>
+                <button type="button" class="btn-outline shrink-0" aria-haspopup="dialog" data-modal-open="review-modal">
+                    <x-icon name="star" class="size-4" />
+                    {{ __('Write a review') }}
+                </button>
+            </div>
 
+            {{-- Slider only when testimonials exist; review button always renders --}}
+            @if (count($testimonials) > 0)
+            @php
+                $reviewSlides = array_chunk($testimonials, 3);
+                // Kolom mengikuti jumlah review bila < 3 agar tidak ada ruang kosong.
+                $reviewCols = ['md:grid-cols-1', 'md:grid-cols-2', 'md:grid-cols-3'][min(3, count($testimonials)) - 1];
+            @endphp
             <div class="mt-8" aria-roledescription="carousel" aria-labelledby="testimoni-title" data-module="testimonial-slider">
                 <div class="touch-pan-y overflow-hidden rounded-lg border border-line bg-surface select-none" data-slider-viewport>
                     <div class="slider-track" data-slider-track>
@@ -169,7 +176,47 @@
                     </div>
                 @endif
             </div>
+            @endif
         </section>
-    @endif
     <x-product-buy-modal />
+
+    <x-modal id="review-modal" :title="__('Share your experience')" class="max-w-lg">
+        {{-- Simpan ulasan ke database adalah fase berikutnya, jadi form belum dikirim --}}
+        <form method="post" class="grid gap-4" novalidate aria-labelledby="review-modal-title">
+            <div>
+                <label for="ulasan-nama" class="form-label">{{ __('Your name') }}</label>
+                <input id="ulasan-nama" type="text" class="form-input" maxlength="100" autocomplete="name">
+            </div>
+
+            <fieldset>
+                <legend class="form-label">{{ __('Your rating') }}</legend>
+                {{-- Bintang ke-n menyala bila radio n atau setelahnya dicentang (CSS :has, tanpa JS) --}}
+                <div class="mt-1 flex w-fit gap-1 text-line-strong">
+                    @for ($star = 1; $star <= 5; $star++)
+                        <input id="ulasan-bintang-{{ $star }}" type="radio" name="rating" value="{{ $star }}" class="sr-only">
+                        <label for="ulasan-bintang-{{ $star }}"
+                               class="cursor-pointer rounded-sm transition-colors hover:text-accent-500 [&:has(~input:checked)]:text-accent-500 [&:has(~label:hover)]:text-accent-500 [input:checked+&]:text-accent-500 [input:focus-visible+&]:outline-2 [input:focus-visible+&]:outline-offset-2 [input:focus-visible+&]:outline-brand-500">
+                            <x-icon name="star-filled" class="size-7" />
+                            <span class="sr-only">{{ __(':count of 5 stars', ['count' => $star]) }}</span>
+                        </label>
+                    @endfor
+                </div>
+            </fieldset>
+
+            <div>
+                <label for="ulasan-komentar" class="form-label">{{ __('Your review') }}</label>
+                <textarea id="ulasan-komentar" class="form-input min-h-28" rows="4" maxlength="1000"
+                          placeholder="{{ __('Tell us about your trip') }}"></textarea>
+            </div>
+
+            <button type="submit" class="btn-primary w-fit px-6" disabled aria-describedby="ulasan-fase-info">
+                {{ __('Submit review') }}
+            </button>
+
+            <p id="ulasan-fase-info" class="flex items-start gap-2 rounded-md bg-surface-muted p-3 text-xs text-ink-muted">
+                <x-icon name="info-circle" class="size-4" />
+                {{ __('Review submission will be active in the next phase.') }}
+            </p>
+        </form>
+    </x-modal>
 @endsection

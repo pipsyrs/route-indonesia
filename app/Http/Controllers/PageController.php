@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\City;
-use App\Models\Facility;
 use App\Models\PaymentMethod;
 use App\Models\Promo;
 use App\Models\Schedule;
@@ -80,7 +79,6 @@ class PageController extends Controller
             'cities' => $this->cities(),
             'trips' => $trips,
             'operators' => array_values(array_unique(array_column($trips, 'operator'))),
-            'facilities' => $this->facilityLabels(),
             'dateStrip' => $this->dateStrip($date),
             'searchError' => $isSameCity ? 'Kota asal dan tujuan tidak boleh sama.' : null,
             'notice' => self::SEARCH_NOTICES[$this->stringQuery($request, 'notice')] ?? null,
@@ -123,7 +121,6 @@ class PageController extends Controller
             'passengers' => $passengers,
             'passengersReduced' => $passengers < $requestedPassengers,
             'serviceFee' => self::SERVICE_FEE,
-            'facilityLabels' => $this->facilityLabels(),
             'notice' => self::TRIP_NOTICES[$noticeKey] ?? null,
             'backQuery' => [
                 'from' => $trip['origin'],
@@ -201,6 +198,11 @@ class PageController extends Controller
     public function tripPage(): View
     {
         return view('pages.trips');
+    }
+
+    public function community(): View
+    {
+        return view('pages.community');
     }
 
     public function collaboration(): View
@@ -481,12 +483,6 @@ class PageController extends Controller
     private function cityIds(): array
     {
         return $this->cityIds ??= City::active()->orderBy('id')->pluck('id', 'name')->all();
-    }
-
-    /** @return array<string, string> code => label */
-    private function facilityLabels(): array
-    {
-        return Facility::orderBy('id')->pluck('label', 'code')->all();
     }
 
     private function trips(string $origin, string $destination, Carbon $date): array

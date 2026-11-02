@@ -1,4 +1,4 @@
-@props(['trip', 'query', 'facilities'])
+@props(['trip', 'query'])
 @php
     $hasEnoughSeats = $trip['seats_left'] >= (int) ($query['passengers'] ?? 1);
     $isSeatsLow = $trip['seats_left'] <= 3;
@@ -12,14 +12,16 @@
          data-duration="{{ $trip['duration_minutes'] }}"
          data-rating="{{ $trip['rating'] }}"
          data-operator="{{ $trip['operator'] }}"
-         data-facilities="{{ implode(',', $trip['facilities']) }}"
          data-seats="{{ $trip['seats_left'] }}"
          aria-labelledby="trip-{{ $trip['id'] }}-title">
     <div class="min-w-0">
         <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
             <h3 id="trip-{{ $trip['id'] }}-title" class="text-base font-bold text-ink">{{ $trip['operator'] }}</h3>
-            <x-rating :value="$trip['rating']" />
-            <span class="text-sm text-ink-subtle">{{ $trip['vehicle'] }}</span>
+            <span @class([
+                'chip text-xs font-semibold',
+                'bg-brand-soft text-brand-ink' => $trip['type'] === 'private',
+                'bg-surface-muted text-ink-muted' => $trip['type'] !== 'private',
+            ])>{{ $trip['type'] === 'private' ? 'Private' : 'Open Trip' }}</span>
         </div>
 
         <div class="mt-4 flex items-center gap-3 sm:gap-4">
@@ -42,12 +44,6 @@
                 <p class="text-xs text-ink-subtle">{{ $trip['destination'] }}</p>
             </div>
         </div>
-
-        <ul class="mt-4 flex flex-wrap gap-1.5" aria-label="Fasilitas">
-            @foreach ($trip['facilities'] as $code)
-                <li><x-facility-badge :code="$code" :label="$facilities[$code] ?? $code" /></li>
-            @endforeach
-        </ul>
     </div>
 
     <div class="flex items-end justify-between gap-4 border-t border-line pt-4 md:flex-col md:items-end md:justify-between md:border-t-0 md:border-l md:pt-0 md:pl-8">

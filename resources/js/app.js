@@ -10,6 +10,7 @@ import { initCartPage } from './modules/cart-page';
 import { initCheckout } from './modules/checkout';
 import { initCheckoutPayment } from './modules/checkout-payment';
 import { initHeroSlider } from './modules/hero-slider';
+import { initJobApply } from './modules/job-apply';
 import { initModals } from './modules/modal';
 import { initOrderSuccess } from './modules/order-success';
 import { initBookingForm } from './modules/booking-form';
@@ -48,6 +49,7 @@ const MODULES = {
     'account-addresses': initAccountAddresses,
     'product-buy': initProductBuy,
     'product-viewer': initProductViewer,
+    'job-apply': initJobApply,
 };
 
 document.querySelectorAll('[data-module]').forEach((element) => {

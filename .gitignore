@@ -39,3 +39,6 @@ skills-lock.json
 /.claude/agents/analyst.md
 /.claude/agents/frontend.md
 /.claude/agents/backend.md
+
+# docker (machine-specific local override)
+/docker-compose.override.yml

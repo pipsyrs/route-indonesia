@@ -37,7 +37,6 @@ class ShopController extends Controller
 
         return view('pages.catalog.index', [
             'trips' => $trips,
-            'facilities' => DummyShop::facilityLabels(),
             'query' => [
                 'q' => $keyword,
                 'from' => $origin,
@@ -61,7 +60,6 @@ class ShopController extends Controller
             'date' => $date->toDateString(),
             'dateLabel' => $date->translatedFormat('l, j F Y'),
             'maxQty' => min($trip['seats_left'], DummyShop::MAX_QTY),
-            'facilityLabels' => DummyShop::facilityLabels(),
             'seatMap' => DummyShop::seatMap($trip, $date->toDateString()),
         ]);
     }

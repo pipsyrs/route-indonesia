@@ -99,7 +99,7 @@
 
                     <div class="grid gap-4" data-filter-list>
                         @foreach ($trips as $trip)
-                            <x-trip-card :trip="$trip" :query="$query" :facilities="$facilities" />
+                            <x-trip-card :trip="$trip" :query="$query" />
                         @endforeach
                     </div>
             </div>

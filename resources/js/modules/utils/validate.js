@@ -5,6 +5,9 @@ const PLACE_PATTERN = /^[\p{L}][\p{L} .'()-]{2,59}$/u;
 const POSTAL_PATTERN = /^[1-9][0-9]{4}$/;
 const INSTAGRAM_PATTERN = /^[A-Za-z0-9._]{1,30}$/;
 const REFERRAL_PATTERN = /^[A-Za-z0-9-]{3,20}$/;
+// RI- is the code currently issued at checkout; RID-/ORD- are the target formats.
+const BOOKING_CODE_PATTERN = /^RID?-[A-Z0-9]{6}$/;
+const ORDER_CODE_PATTERN = /^(ORD-[A-Z0-9]{8}|RI-[A-Z0-9]{6})$/;
 
 export const normalizePhone = (value) => value.replace(/[\s-]/g, '');
 export const normalizeInstagram = (value) => value.trim().replace(/^@/, '').toLowerCase();
@@ -14,6 +17,9 @@ const RULES = {
     name: (value) => (NAME_PATTERN.test(value) ? null : 'Isi nama minimal 3 huruf.'),
     email: (value) => (EMAIL_PATTERN.test(value) ? null : 'Masukkan email yang valid, contoh nama@email.com.'),
     phone: (value) => (PHONE_PATTERN.test(normalizePhone(value)) ? null : 'Nomor HP harus diawali 08 atau +628.'),
+    contact: (value) => (EMAIL_PATTERN.test(value) || PHONE_PATTERN.test(normalizePhone(value)) ? null : 'Masukkan email atau nomor HP (08/+628) yang valid.'),
+    'booking-code': (value) => (BOOKING_CODE_PATTERN.test(value) ? null : 'Kode booking harus berformat RID-XXXXXX atau RI-XXXXXX.'),
+    'order-code': (value) => (ORDER_CODE_PATTERN.test(value) ? null : 'ID pesanan harus berformat ORD-XXXXXXXX atau RI-XXXXXX.'),
     password: (value) => (value.length >= 8 ? null : 'Kata sandi minimal 8 karakter.'),
     required: (value) => (value === '' ? 'Wajib diisi.' : null),
     agree: (_value, input) => (input.checked ? null : 'Centang persetujuan untuk melanjutkan.'),
@@ -24,8 +30,14 @@ const RULES = {
     address: (value) => (value.length >= 10 && value.length <= 200 ? null : 'Isi alamat lengkap minimal 10 karakter.'),
     place: (value) => (PLACE_PATTERN.test(value) ? null : 'Isi minimal 3 huruf, tanpa angka.'),
     postal: (value) => (POSTAL_PATTERN.test(value) ? null : 'Kode pos harus 5 angka.'),
+    instagram: (value) => {
+        if (normalizeInstagram(value) === '') {
+            return 'Wajib diisi.';
+        }
+
+        return INSTAGRAM_PATTERN.test(normalizeInstagram(value)) ? null : 'Username hanya huruf, angka, titik, atau garis bawah.';
+    },
     // Opsional: kosong lolos.
-    instagram: (value) => (value === '' || INSTAGRAM_PATTERN.test(normalizeInstagram(value)) ? null : 'Username hanya huruf, angka, titik, atau garis bawah.'),
     referral: (value) => (value === '' || REFERRAL_PATTERN.test(value) ? null : 'Kode referral 3-20 huruf, angka, atau tanda hubung.'),
 };
 

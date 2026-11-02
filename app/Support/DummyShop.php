@@ -18,38 +18,35 @@ class DummyShop
         return ['Jakarta', 'Bandung', 'Yogyakarta', 'Semarang', 'Surabaya', 'Malang'];
     }
 
-    /** @return array<string, string> code => label */
-    public static function facilityLabels(): array
-    {
-        return [
-            'ac' => 'AC',
-            'wifi' => 'Wi-Fi',
-            'charger' => 'Charger',
-            'reclining' => 'Kursi reclining',
-            'snack' => 'Snack',
-            'toilet' => 'Toilet',
-            'blanket' => 'Selimut',
-        ];
-    }
-
     /** @return list<array<string, mixed>> */
     public static function trips(): array
     {
-        // [id, operator, vehicle, origin, destination, depart, menit, harga, sisa kursi, fasilitas, rating, jemput, antar]
+        // [id, operator, vehicle, origin, destination, depart, menit, harga, sisa kursi, rating, jemput, antar]
         $rows = [
-            [1, 'Cipaganti', 'Hiace Premio', 'Jakarta', 'Bandung', '07:00', 195, 150000, 7, ['ac', 'wifi', 'charger'], 4.7, 'Pool Cawang', 'Pool Pasteur'],
-            [2, 'Daytrans', 'Hiace Commuter', 'Jakarta', 'Bandung', '09:30', 180, 135000, 4, ['ac', 'charger'], 4.5, 'Pool Blok M', 'Pool Dipatiukur'],
-            [3, 'Baraya', 'Elf Long', 'Jakarta', 'Bandung', '13:00', 210, 110000, 10, ['ac'], 4.2, 'Pool Grogol', 'Pool Surapati'],
-            [4, 'Xtrans', 'Hiace Premio', 'Bandung', 'Jakarta', '06:00', 200, 150000, 3, ['ac', 'wifi', 'charger', 'reclining'], 4.8, 'Pool Cihampelas', 'Pool Kuningan'],
-            [5, 'Joglosemar', 'Executive Bus', 'Jakarta', 'Yogyakarta', '19:00', 540, 285000, 12, ['ac', 'wifi', 'toilet', 'blanket', 'reclining'], 4.6, 'Terminal Lebak Bulus', 'Pool Jombor'],
-            [6, 'Rajawali', 'Hiace Premio', 'Yogyakarta', 'Semarang', '08:00', 210, 120000, 5, ['ac', 'charger', 'snack'], 4.4, 'Pool Janti', 'Pool Banyumanik'],
-            [7, 'Nusantara', 'Executive Bus', 'Semarang', 'Surabaya', '20:30', 420, 230000, 9, ['ac', 'toilet', 'blanket'], 4.3, 'Terminal Terboyo', 'Terminal Bungurasih'],
-            [8, 'Tirtaja', 'Hiace Commuter', 'Surabaya', 'Malang', '10:00', 150, 95000, 6, ['ac', 'charger'], 4.5, 'Pool Darmo', 'Pool Dinoyo'],
-            [9, 'Golden Bird', 'Elf Long', 'Malang', 'Surabaya', '15:00', 160, 90000, 2, ['ac'], 4.1, 'Pool Sukun', 'Pool Gubeng'],
-            [10, 'Sumber Alam', 'Executive Bus', 'Yogyakarta', 'Jakarta', '18:00', 560, 290000, 8, ['ac', 'wifi', 'toilet', 'snack', 'reclining'], 4.7, 'Pool Ringroad', 'Pool Pulogadung'],
+            [1, 'Cipaganti', 'Hiace Premio', 'Jakarta', 'Bandung', '07:00', 195, 150000, 7, 4.7, 'Pool Cawang', 'Pool Pasteur'],
+            [2, 'Daytrans', 'Hiace Commuter', 'Jakarta', 'Bandung', '09:30', 180, 135000, 4, 4.5, 'Pool Blok M', 'Pool Dipatiukur'],
+            [3, 'Baraya', 'Elf Long', 'Jakarta', 'Bandung', '13:00', 210, 110000, 10, 4.2, 'Pool Grogol', 'Pool Surapati'],
+            [4, 'Xtrans', 'Hiace Premio', 'Bandung', 'Jakarta', '06:00', 200, 150000, 3, 4.8, 'Pool Cihampelas', 'Pool Kuningan'],
+            [5, 'Joglosemar', 'Executive Bus', 'Jakarta', 'Yogyakarta', '19:00', 540, 285000, 12, 4.6, 'Terminal Lebak Bulus', 'Pool Jombor'],
+            [6, 'Rajawali', 'Hiace Premio', 'Yogyakarta', 'Semarang', '08:00', 210, 120000, 5, 4.4, 'Pool Janti', 'Pool Banyumanik'],
+            [7, 'Nusantara', 'Executive Bus', 'Semarang', 'Surabaya', '20:30', 420, 230000, 9, 4.3, 'Terminal Terboyo', 'Terminal Bungurasih'],
+            [8, 'Tirtaja', 'Hiace Commuter', 'Surabaya', 'Malang', '10:00', 150, 95000, 6, 4.5, 'Pool Darmo', 'Pool Dinoyo'],
+            [9, 'Golden Bird', 'Elf Long', 'Malang', 'Surabaya', '15:00', 160, 90000, 2, 4.1, 'Pool Sukun', 'Pool Gubeng'],
+            [10, 'Sumber Alam', 'Executive Bus', 'Yogyakarta', 'Jakarta', '18:00', 560, 290000, 8, 4.7, 'Pool Ringroad', 'Pool Pulogadung'],
         ];
 
-        return array_map(fn (array $row) => self::makeTrip(...$row), $rows);
+        // Nama rute induk per trip (sub-rute), dipakai judul halaman detail.
+        $routeNames = [];
+        foreach (self::routes() as $route) {
+            foreach ($route['trip_ids'] as $tripId) {
+                $routeNames[$tripId] ??= $route['name'];
+            }
+        }
+
+        return array_map(
+            fn (array $row) => self::makeTrip(...$row) + ['route_name' => $routeNames[$row[0]] ?? null],
+            $rows,
+        );
     }
 
     /** @return array<string, mixed>|null */
@@ -170,40 +167,19 @@ class DummyShop
         return $orders;
     }
 
-    /** @return list<list<string|null>> format FleetSeeder::SEAT_LAYOUT_14: 'D' = sopir, null = lorong */
-    public static function seatLayout(string $vehicle): array
+    /** Static 13-seat layout for every trip: 'C' = crew, 'D' = driver, null = aisle, digits = seat. */
+    public const SEAT_LAYOUT = [
+        ['C', null, null, 'D'],
+        [null, '1', '2', '3'],
+        ['4', null, '5', '6'],
+        ['7', null, '8', '9'],
+        ['10', '11', '12', '13'],
+    ];
+
+    /** @return list<list<string|null>> */
+    public static function seatLayout(): array
     {
-        return match ($vehicle) {
-            'Hiace Premio' => [
-                ['D', null, null, '1'],
-                ['2', null, '3', '4'],
-                ['5', null, '6', '7'],
-                ['8', null, '9', '10'],
-            ],
-            'Elf Long' => [
-                ['D', null, '1', '2'],
-                ['3', null, '4', '5'],
-                ['6', null, '7', '8'],
-                ['9', null, '10', '11'],
-                ['12', null, '13', '14'],
-                ['15', '16', '17', '18'],
-            ],
-            // 2-lorong-2, 8 baris x 4 kursi.
-            'Executive Bus' => [
-                ['D', null, null, null, null],
-                ...array_map(
-                    fn (int $row) => [(string) ($row * 4 + 1), (string) ($row * 4 + 2), null, (string) ($row * 4 + 3), (string) ($row * 4 + 4)],
-                    range(0, 7),
-                ),
-            ],
-            default => [
-                ['D', null, null, '1'],
-                ['2', null, '3', '4'],
-                ['5', null, '6', '7'],
-                ['8', null, '9', '10'],
-                ['11', '12', '13', '14'],
-            ],
-        };
+        return self::SEAT_LAYOUT;
     }
 
     /**
@@ -214,7 +190,7 @@ class DummyShop
     {
         return array_values(array_filter(
             array_merge(...$layout),
-            fn (?string $cell) => $cell !== null && $cell !== 'D',
+            fn (?string $cell) => $cell !== null && preg_match('/^[0-9]{1,2}$/', $cell) === 1,
         ));
     }
 
@@ -226,7 +202,7 @@ class DummyShop
             return [];
         }
 
-        $seats = self::seatCodes(self::seatLayout($trip['vehicle']));
+        $seats = self::seatCodes(self::seatLayout());
         $count = max(0, count($seats) - $trip['seats_left']);
 
         // md5 dulu: crc32 linear, tanpa itu pola kursi nyaris sama antar tanggal.
@@ -245,7 +221,7 @@ class DummyShop
     public static function seatMap(array $trip, string $date): array
     {
         return [
-            'layout' => self::seatLayout($trip['vehicle']),
+            'layout' => self::seatLayout(),
             'occupied' => self::occupiedSeats($trip['id'], $date),
         ];
     }
@@ -264,7 +240,6 @@ class DummyShop
         ];
     }
 
-    /** @param  list<string>  $facilities */
     private static function makeTrip(
         int $id,
         string $operator,
@@ -275,7 +250,6 @@ class DummyShop
         int $minutes,
         int $price,
         int $seatsLeft,
-        array $facilities,
         float $rating,
         string $pickupName,
         string $dropoffName,
@@ -283,6 +257,12 @@ class DummyShop
         [$hour, $minute] = array_map('intval', explode(':', $depart));
         $arriveTotal = $hour * 60 + $minute + $minutes;
         $arrive = sprintf('%02d:%02d', intdiv($arriveTotal, 60) % 24, $arriveTotal % 60);
+
+        $itinerary = [['title' => $pickupName, 'description' => "Titik kumpul di {$pickupName}, {$origin}. Mohon tiba 15 menit lebih awal untuk pengecekan tiket dan bagasi."]];
+        if ($minutes >= 300) {
+            $itinerary[] = ['title' => 'Rest area', 'description' => 'Berhenti sekitar 30 menit untuk istirahat, makan, dan ke toilet sebelum perjalanan dilanjutkan.'];
+        }
+        $itinerary[] = ['title' => $dropoffName, 'description' => "Perjalanan berakhir di {$dropoffName}, {$destination}. Kru membantu menurunkan bagasi Anda."];
 
         return [
             'id' => $id,
@@ -297,8 +277,11 @@ class DummyShop
             'duration' => intdiv($minutes, 60).'j '.($minutes % 60).'m',
             'price' => $price,
             'seats_left' => $seatsLeft,
-            'facilities' => $facilities,
             'rating' => $rating,
+            // Dummy deterministik: tiap trip ke-3 private, sisanya open trip.
+            'type' => $id % 3 === 0 ? 'private' : 'open',
+            'description' => "Perjalanan bersama {$operator}. Kabin dibersihkan sebelum setiap keberangkatan dan bagasi maksimal 20 kg per penumpang.",
+            'itinerary' => $itinerary,
             'pickups' => [['id' => $id * 10 + 1, 'name' => $pickupName, 'time' => $depart, 'address' => "{$pickupName}, {$origin}"]],
             'dropoffs' => [['id' => $id * 10 + 2, 'name' => $dropoffName, 'time' => $arrive, 'address' => "{$dropoffName}, {$destination}"]],
         ];

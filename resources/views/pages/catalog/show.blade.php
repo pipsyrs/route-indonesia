@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', $trip['operator'].' '.$trip['origin'].' ke '.$trip['destination'])
+@section('title', trim($trip['operator'].' '.($trip['route_name'] ?? '')))
 
 @section('module', 'add-to-cart')
 
@@ -24,6 +24,11 @@
         'occupied' => $seatMap['occupied'],
     ];
     $isSoldOut = $maxQty < 1;
+    // Fallback (data DB): titik jemput/antar tanpa deskripsi.
+    $itinerary = ($trip['itinerary'] ?? []) ?: [
+        ['title' => $trip['pickups'][0]['name'] ?? $trip['origin'], 'description' => $trip['pickups'][0]['address'] ?? $trip['origin']],
+        ['title' => $trip['dropoffs'][0]['name'] ?? $trip['destination'], 'description' => $trip['dropoffs'][0]['address'] ?? $trip['destination']],
+    ];
 @endphp
 
 @section('content')
@@ -35,19 +40,12 @@
 
         <div class="mt-4 grid gap-6 lg:grid-cols-[1fr_22rem] lg:gap-10">
             <div class="min-w-0 space-y-6">
-                {{-- Kepala: rute sebagai focal point --}}
+                {{-- Kepala: operator sebagai judul, rute induk sebagai subjudul --}}
                 <header>
-                    <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
-                        <span class="font-semibold text-ink">{{ $trip['operator'] }}</span>
-                        <x-rating :value="$trip['rating']" />
-                        <span class="text-ink-subtle">{{ $trip['vehicle'] }}</span>
-                    </div>
-                    <h1 class="mt-2 flex flex-wrap items-center gap-x-3 text-3xl font-extrabold tracking-tight text-ink md:text-4xl">
-                        {{ $trip['origin'] }}
-                        <x-icon name="arrow-right" class="size-7 text-ink-subtle" />
-                        <span class="sr-only">ke</span>
-                        {{ $trip['destination'] }}
-                    </h1>
+                    <h1 class="text-3xl font-extrabold tracking-tight text-ink md:text-4xl">{{ $trip['operator'] }}</h1>
+                    @if (! empty($trip['route_name']))
+                        <p class="mt-1 text-lg font-semibold text-ink-muted">{{ $trip['route_name'] }}</p>
+                    @endif
                     <p class="mt-2 flex items-center gap-2 text-ink-muted">
                         <x-icon name="calendar" class="size-4" />
                         {{ $dateLabel }}
@@ -58,40 +56,33 @@
                 <section class="card p-5 sm:p-6" aria-labelledby="perjalanan-title">
                     <h2 id="perjalanan-title" class="text-base font-bold text-ink">Itenarary Trip</h2>
                     <ol class="mt-5 space-y-0">
-                        <li class="relative flex gap-4 pb-8">
-                            <span class="absolute top-6 bottom-0 left-[0.6875rem] w-px bg-line-strong" aria-hidden="true"></span>
-                            <span class="relative mt-1 size-[1.375rem] shrink-0 rounded-full border-4 border-brand-soft bg-brand-600" aria-hidden="true"></span>
-                            <div>
-                                <p class="text-xl font-bold tabular-nums text-ink">{{ $trip['depart'] }}</p>
-                                <p class="font-semibold text-ink">{{ $trip['pickups'][0]['name'] ?? $trip['origin'] }}</p>
-                                <p class="text-sm text-ink-subtle">{{ $trip['pickups'][0]['address'] ?? $trip['origin'] }}</p>
-                                <p class="mt-3 inline-flex items-center gap-1.5 rounded-full bg-surface-muted px-3 py-1 text-xs font-medium text-ink-muted">
-                                    <x-icon name="clock" class="size-3.5" />
-                                    {{ $trip['duration'] }}
-                                </p>
-                            </div>
-                        </li>
-                        <li class="flex gap-4">
-                            <span class="mt-1 size-[1.375rem] shrink-0 rounded-full border-4 border-line bg-surface" aria-hidden="true"></span>
-                            <div>
-                                <p class="text-xl font-bold tabular-nums text-ink">
-                                    {{ $trip['arrive'] }}@if ($trip['arrives_next_day'])<sup class="ml-0.5 text-[10px] font-semibold text-warn-ink">+1</sup><span class="sr-only">(hari berikutnya)</span>@endif
-                                </p>
-                                <p class="font-semibold text-ink">{{ $trip['dropoffs'][0]['name'] ?? $trip['destination'] }}</p>
-                                <p class="text-sm text-ink-subtle">{{ $trip['dropoffs'][0]['address'] ?? $trip['destination'] }}</p>
-                            </div>
-                        </li>
+                        @foreach ($itinerary as $step)
+                            <li @class(['relative flex gap-4', 'pb-8' => ! $loop->last])>
+                                @unless ($loop->last)
+                                    <span class="absolute top-6 bottom-0 left-[0.6875rem] w-px bg-line-strong" aria-hidden="true"></span>
+                                @endunless
+                                <span @class([
+                                    'relative mt-1 size-[1.375rem] shrink-0 rounded-full border-4',
+                                    'border-brand-soft bg-brand-600' => $loop->first,
+                                    'border-line bg-surface' => ! $loop->first,
+                                ]) aria-hidden="true"></span>
+                                <div>
+                                    <p class="font-semibold text-ink">{{ $step['title'] }}</p>
+                                    <p class="mt-1 text-sm leading-relaxed text-ink-muted">{{ $step['description'] }}</p>
+                                </div>
+                            </li>
+                        @endforeach
                     </ol>
                 </section>
 
-                <section class="card p-5 sm:p-6" aria-labelledby="fasilitas-title">
-                    <h2 id="fasilitas-title" class="text-base font-bold text-ink">Fasilitas</h2>
-                    <ul class="mt-4 flex flex-wrap gap-2">
-                        @foreach ($trip['facilities'] as $code)
-                            <li><x-facility-badge :code="$code" :label="$facilityLabels[$code] ?? $code" class="px-3 py-1.5 text-sm" /></li>
-                        @endforeach
-                    </ul>
+                @if (filled($trip['description'] ?? null))
+                <section class="card p-5 sm:p-6" aria-labelledby="deskripsi-title">
+                    <h2 id="deskripsi-title" class="text-base font-bold text-ink">Deskripsi</h2>
+                    <p class="mt-3 leading-relaxed text-ink-muted">
+                        {{ $trip['description'] }}
+                    </p>
                 </section>
+                @endif
             </div>
 
             {{-- Panel pemesanan: lengket di desktop --}}
@@ -107,7 +98,7 @@
                         <label for="titik-jemput" class="form-label mt-5">Titik jemput</label>
                         <select id="titik-jemput" class="form-input appearance-none" data-pickup>
                             @foreach ($trip['pickups'] as $point)
-                                <option value="{{ $point['id'] }}">{{ $point['name'] }} ({{ $point['time'] }})</option>
+                                <option value="{{ $point['id'] }}">{{ $point['name'] }}</option>
                             @endforeach
                         </select>
                     @endif
@@ -115,7 +106,7 @@
                         <label for="titik-antar" class="form-label mt-4">Titik antar</label>
                         <select id="titik-antar" class="form-input appearance-none" data-dropoff>
                             @foreach ($trip['dropoffs'] as $point)
-                                <option value="{{ $point['id'] }}">{{ $point['name'] }} ({{ $point['time'] }})</option>
+                                <option value="{{ $point['id'] }}">{{ $point['name'] }}</option>
                             @endforeach
                         </select>
                     @endif

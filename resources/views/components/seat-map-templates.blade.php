@@ -1,4 +1,7 @@
 {{-- Sel denah untuk utils/seat-map.js; kelas di Blade agar terbaca Tailwind --}}
+<template data-seat-crew-template>
+    <span class="grid aspect-square w-full place-items-center rounded-md bg-surface-muted text-xs font-semibold text-ink-subtle">Crew</span>
+</template>
 <template data-seat-driver-template>
     <span class="grid aspect-square w-full place-items-center rounded-md bg-surface-muted text-ink-subtle" title="Sopir">
         <x-icon name="steering-wheel" class="size-5" /><span class="sr-only">Sopir</span>

@@ -107,17 +107,12 @@
                     <div class="mt-5 grid gap-4 sm:grid-cols-2">
                         <div class="sm:col-span-2">
                             <label for="info-sumber" class="form-label">Dari mana Anda tahu trip ini?</label>
-                            <select id="info-sumber" class="form-input appearance-none"
-                                    data-field="referral_source" data-rule="option" aria-describedby="info-sumber-error">
-                                <option value="">Pilih salah satu</option>
-                                @foreach (['instagram' => 'Instagram', 'tiktok' => 'TikTok', 'friend' => 'Teman', 'google' => 'Google', 'other' => 'Lainnya'] as $value => $label)
-                                    <option value="{{ $value }}">{{ $label }}</option>
-                                @endforeach
-                            </select>
+                            <input id="info-sumber" type="text" class="form-input" autocomplete="off" maxlength="100"
+                                   data-field="referral_source" data-rule="required" aria-describedby="info-sumber-error">
                             <p id="info-sumber-error" class="form-error" hidden></p>
                         </div>
                         <div>
-                            <label for="info-instagram" class="form-label">Username Instagram <span class="font-normal text-ink-subtle">(opsional)</span></label>
+                            <label for="info-instagram" class="form-label">Username Instagram</label>
                             <div class="relative">
                                 <span class="pointer-events-none absolute inset-y-0 left-3.5 flex items-center text-sm text-ink-subtle" aria-hidden="true">@</span>
                                 <input id="info-instagram" type="text" class="form-input pl-8" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="31"
@@ -132,28 +127,6 @@
                             <p id="info-referral-error" class="form-error" hidden></p>
                         </div>
                     </div>
-                </section>
-
-                <section class="card p-5 sm:p-6" aria-labelledby="metode-title">
-                    <h2 id="metode-title" class="text-lg font-bold text-ink">Metode pembayaran</h2>
-                    {{-- Satu-satunya metode; radio tetap ada karena checkout.js membaca [name="method"]:checked --}}
-                    <label class="mt-5 block cursor-pointer">
-                        <input type="radio" name="method" value="bank_transfer" class="peer sr-only" checked aria-describedby="metode-note">
-                        <span class="flex items-center gap-3 rounded-md border border-brand-600 bg-brand-soft px-4 py-3 text-sm peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-brand-500">
-                            <span class="grid size-9 shrink-0 place-items-center rounded-lg bg-surface text-brand-ink">
-                                <x-icon name="building-bank" class="size-5" />
-                            </span>
-                            <span class="min-w-0 flex-1">
-                                <span class="block font-semibold text-ink">Transfer Bank</span>
-                                <span class="block text-xs text-ink-muted">Konfirmasi manual oleh admin</span>
-                            </span>
-                            <x-icon name="circle-check" class="size-5 text-brand-ink" />
-                        </span>
-                    </label>
-                    <p id="metode-note" class="mt-3 flex items-start gap-2 text-sm text-ink-muted">
-                        <x-icon name="info-circle" class="mt-0.5 size-4" />
-                        <span>Setelah ini kamu akan melihat rekening tujuan. Transfer sesuai total, lalu unggah bukti transfer di halaman pembayaran.</span>
-                    </p>
                 </section>
             </div>
 

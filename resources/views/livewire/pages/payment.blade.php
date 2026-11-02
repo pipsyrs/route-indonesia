@@ -20,7 +20,7 @@
                         <p class="mt-1 text-4xl font-extrabold tracking-tight tabular-nums" data-countdown-value aria-live="off">30:00</p>
                     </div>
                     <div class="text-right">
-                        <p class="text-xs">Kode booking</p>
+                        <p class="text-xs" data-booking-code-label>Kode booking</p>
                         <p class="font-mono text-lg font-bold tracking-wider" data-booking-code></p>
                     </div>
                 </section>

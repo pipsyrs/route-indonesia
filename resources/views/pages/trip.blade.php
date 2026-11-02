@@ -40,12 +40,6 @@
             </div>
         </header>
 
-        <ul class="mt-4 flex flex-wrap gap-1.5" aria-label="Fasilitas">
-            @foreach ($trip['facilities'] as $code)
-                <li><x-facility-badge :code="$code" :label="$facilityLabels[$code] ?? $code" /></li>
-            @endforeach
-        </ul>
-
         @if ($notice)
             <div class="mt-6 flex items-start gap-3 rounded-md bg-warn-soft p-4 text-sm text-warn-ink" role="alert">
                 <x-icon name="alert-circle" class="size-5" />

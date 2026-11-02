@@ -1,4 +1,4 @@
-import { LAST_ORDER_KEY, SESSION_KEY, isProductItem, isValidItem } from './cart';
+import { LAST_ORDER_KEY, SESSION_KEY, isProductItem, isValidItem, orderCodeLabel } from './cart';
 import { AWAITING_CONFIRMATION } from './checkout-payment';
 import { openModal } from './modal';
 import { formatRupiah } from './utils/format';
@@ -38,12 +38,15 @@ export function initOrderSuccess(root) {
     page.querySelectorAll('[data-field="email"]').forEach((element) => {
         element.textContent = order.contact?.email ?? 'email pemesan';
     });
+    const codeLabel = orderCodeLabel(order.items.filter(isValidItem));
+    set(page, 'code-label', codeLabel);
     set(page, 'code', order.bookingCode);
     set(page, 'subtotal', formatRupiah(order.subtotal ?? 0));
     set(page, 'fee', formatRupiah(order.serviceFee ?? 0));
     set(page, 'method', order.methodName ?? '-');
     set(page, 'total', formatRupiah(order.total ?? 0));
     page.querySelector('[data-code-copy]').dataset.copy = order.bookingCode;
+    page.querySelector('[data-code-copy]').dataset.copyMessage = `${codeLabel} disalin`;
 
     const template = root.querySelector('[data-success-item-template]');
     page.querySelector('[data-success-items]').replaceChildren(...order.items.filter(isValidItem).map((item) => {

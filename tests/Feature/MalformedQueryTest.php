@@ -42,7 +42,7 @@ class MalformedQueryTest extends TestCase
     #[DataProvider('malformedQueries')]
     public function test_it_should_never_return_server_error_when_query_is_malformed(string $query): void
     {
-        foreach (['/', '/search', '/katalog', '/katalog/1', '/keranjang', '/checkout', '/pembayaran', '/pembayaran/selesai', '/masuk', '/akun/pesanan', '/cek-pesanan'] as $path) {
+        foreach (['/', '/search', '/catalog', '/catalog/1', '/cart', '/checkout', '/payment', '/payment/success', '/login', '/account/orders', '/check-order'] as $path) {
             $status = $this->get("{$path}?{$query}")->getStatusCode();
 
             $this->assertLessThan(500, $status, "{$path}?".mb_substr($query, 0, 80)." → {$status}");
@@ -51,7 +51,7 @@ class MalformedQueryTest extends TestCase
 
     public function test_it_should_fall_back_to_all_cities_and_no_date_when_catalog_input_is_invalid(): void
     {
-        $this->get('/katalog?from[]=Surabaya&to=Atlantis&date=2026-02-31')
+        $this->get('/catalog?from[]=Surabaya&to=Atlantis&date=2026-02-31')
             ->assertOk()
             ->assertViewHas('query', fn ($query) => $query['from'] === null
                 && $query['to'] === null
@@ -60,7 +60,7 @@ class MalformedQueryTest extends TestCase
 
     public function test_it_should_drop_past_date_when_browsing_catalog(): void
     {
-        $this->get('/katalog?date=2000-01-01')
+        $this->get('/catalog?date=2000-01-01')
             ->assertOk()
             ->assertViewHas('query', fn ($query) => $query['date'] === null);
     }

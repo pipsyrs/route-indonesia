@@ -84,8 +84,8 @@ class ReviewSliderAndIconTest extends TestCase
     public function test_it_should_not_render_empty_icons_on_any_routed_page(): void
     {
         $date = now()->addDay()->toDateString();
-        $uris = ['/', '/shop', '/shop/travel-neck-pillow', '/trip', '/kolaborasi', '/karir', "/katalog?from=Jakarta&to=Bandung&date={$date}",
-            '/katalog/1', '/keranjang', '/checkout', '/pembayaran', '/pembayaran/selesai', '/masuk', '/daftar', '/akun', '/akun/pesanan', '/akun/profil', '/cek-pesanan'];
+        $uris = ['/', '/shop', '/shop/travel-neck-pillow', '/trip', '/collaborations', '/careers', "/catalog?from=Jakarta&to=Bandung&date={$date}",
+            '/catalog/1', '/cart', '/checkout', '/payment', '/payment/success', '/login', '/register', '/account', '/account/orders', '/account/profile', '/check-order'];
 
         foreach ($uris as $uri) {
             $html = $this->get($uri)->assertOk()->getContent();

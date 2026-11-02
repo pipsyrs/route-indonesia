@@ -77,7 +77,7 @@ class ValidateSeatSelection
             return 'Kursi yang sama dipilih lebih dari sekali. Pilih ulang kursi.';
         }
 
-        $codes = DummyShop::seatCodes(DummyShop::seatLayout($trip['vehicle']));
+        $codes = DummyShop::seatCodes(DummyShop::seatLayout());
         $occupied = DummyShop::occupiedSeats($tripId, $date);
 
         foreach ($seats as $seat) {

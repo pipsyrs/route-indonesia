@@ -59,6 +59,11 @@ export function isProductItem(item) {
     return item.type === 'product';
 }
 
+/** Shop-only orders use "ID pesanan"; any trip item keeps "Kode booking". */
+export function orderCodeLabel(items) {
+    return items.length > 0 && items.every(isProductItem) ? 'ID pesanan' : 'Kode booking';
+}
+
 /** Sidik isi keranjang (key + qty + kursi) untuk mendeteksi perubahan. */
 export function cartSignature(cart = getCart()) {
     return cart.items.map((item) => `${item.key}:${item.qty}:${(item.seats ?? []).join('.')}`).sort().join(',');
