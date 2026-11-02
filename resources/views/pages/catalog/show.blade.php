@@ -54,7 +54,7 @@
 
                 {{-- Linimasa perjalanan --}}
                 <section class="card p-5 sm:p-6" aria-labelledby="perjalanan-title">
-                    <h2 id="perjalanan-title" class="text-base font-bold text-ink">Itenarary Trip</h2>
+                    <h2 id="perjalanan-title" class="text-base font-bold text-ink">Itenerary Trip</h2>
                     <ol class="mt-5 space-y-0">
                         @foreach ($itinerary as $step)
                             <li @class(['relative flex gap-4', 'pb-8' => ! $loop->last])>
